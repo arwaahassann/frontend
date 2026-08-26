@@ -1,0 +1,233 @@
+@import "tailwindcss";
+
+:root {
+  --primary: #00D2B4;
+  --sidebar: #1D3557;
+}
+
+@theme inline {
+  --color-primary: var(--primary);
+  --color-sidebar: var(--sidebar);
+  --font-sans: 'Cairo', ui-sans-serif, system-ui, sans-serif;
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body, #root {
+  min-height: 100%;
+  font-family: 'Cairo', sans-serif;
+  direction: rtl;
+  transition: background-color 0.25s ease, color 0.25s ease;
+}
+
+input, textarea, select, button {
+  font-family: 'Cairo', sans-serif;
+}
+
+/* ========================================================
+   💎 الوضع الليلي الراقي والفخم (Luxury Obsidian Velvet Theme)
+   ======================================================== */
+body.dark-mode {
+  background-color: #0b0f17 !important;
+  color: #e2e8f0 !important;
+}
+
+body.dark-mode main {
+  background-color: #0b0f17 !important;
+}
+
+/* 1. الشريط الجانبي (Sidebar) */
+body.dark-mode aside {
+  background: linear-gradient(180deg, #070b12 0%, #0a0f19 100%) !important;
+  border-left: 1px solid rgba(255, 255, 255, 0.07) !important;
+  box-shadow: -4px 0 25px rgba(0, 0, 0, 0.5) !important;
+}
+
+/* 2. الكروت والحاويات والخلفيات البيضاء (تحويل أي عنصر أبيض إلى لون أوبسيديان داكن راقي) */
+body.dark-mode .bg-white,
+body.dark-mode *[style*="background: #ffffff"],
+body.dark-mode *[style*="background: #fff"],
+body.dark-mode *[style*="background: white"],
+body.dark-mode *[style*="background: rgb(255, 255, 255)"],
+body.dark-mode *[style*="background-color: #ffffff"],
+body.dark-mode *[style*="background-color: #fff"],
+body.dark-mode *[style*="background-color: white"],
+body.dark-mode *[style*="background-color: rgb(255, 255, 255)"],
+body.dark-mode *[style*="backgroundColor: '#ffffff'"],
+body.dark-mode *[style*="backgroundColor: \"#ffffff\""],
+body.dark-mode form[style*="background: #ffffff"],
+body.dark-mode form.bg-white {
+  background: #121a2a !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
+  color: #f1f5f9 !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35) !important;
+}
+
+/* 3. الخلفيات الثانوية والمربعات الداخلية (slate-50 / gray-50) */
+body.dark-mode .bg-slate-50,
+body.dark-mode .bg-slate-100,
+body.dark-mode *[style*="background: #f8fafc"],
+body.dark-mode *[style*="background: #f1f5f9"],
+body.dark-mode *[style*="background: #fafafa"],
+body.dark-mode *[style*="backgroundColor: '#f8fafc'"],
+body.dark-mode *[style*="backgroundColor: '#f1f5f9'"],
+body.dark-mode *[style*="backgroundColor: '#fafafa'"] {
+  background-color: #0e1524 !important;
+  border-color: rgba(255, 255, 255, 0.06) !important;
+  color: #cbd5e1 !important;
+}
+
+/* 4. الأزرار البيضاء في الدارك مود (تحويلها لداكنة أنيقة) */
+body.dark-mode button[style*="background: #ffffff"],
+body.dark-mode button[style*="background: #fff"],
+body.dark-mode button[style*="background-color: #ffffff"] {
+  background-color: #162033 !important;
+  border-color: #243550 !important;
+  color: #e2e8f0 !important;
+}
+
+body.dark-mode button[style*="background: #ffffff"]:hover,
+body.dark-mode button[style*="background: #fff"]:hover {
+  background-color: #1e2c45 !important;
+}
+
+/* 5. العناوين والنصوص البارزة */
+body.dark-mode h1,
+body.dark-mode h2,
+body.dark-mode h3,
+body.dark-mode h4,
+body.dark-mode h5,
+body.dark-mode h6,
+body.dark-mode .text-slate-800,
+body.dark-mode .text-slate-900,
+body.dark-mode *[style*="color: #1D3557"],
+body.dark-mode *[style*="color: #1E293B"],
+body.dark-mode *[style*="color: #334155"] {
+  color: #ffffff !important;
+}
+
+/* 6. النصوص الثانوية والمساعدة */
+body.dark-mode .text-slate-500,
+body.dark-mode .text-slate-600,
+body.dark-mode *[style*="color: #64748b"],
+body.dark-mode *[style*="color: #6b7280"],
+body.dark-mode *[style*="color: #94a3b8"],
+body.dark-mode *[style*="color: #9ca3af"] {
+  color: #8b99af !important;
+}
+
+/* 7. حقول الإدخال والـ Inputs والـ Selects */
+body.dark-mode input:not([type="checkbox"]):not([type="radio"]),
+body.dark-mode select,
+body.dark-mode textarea {
+  background-color: #0e1626 !important;
+  border: 1px solid #1e2b42 !important;
+  color: #ffffff !important;
+}
+
+body.dark-mode input::placeholder,
+body.dark-mode textarea::placeholder {
+  color: #52627a !important;
+}
+
+body.dark-mode input:focus,
+body.dark-mode select:focus,
+body.dark-mode textarea:focus {
+  border-color: #00D2B4 !important;
+  box-shadow: 0 0 0 3px rgba(0, 210, 180, 0.2) !important;
+}
+
+/* 8. الجداول في الدارك مود الفاخر */
+body.dark-mode table thead tr {
+  background-color: #0a101d !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+}
+
+body.dark-mode table thead th {
+  color: #8b99af !important;
+  font-weight: 800 !important;
+}
+
+body.dark-mode table tbody tr {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04) !important;
+}
+
+body.dark-mode table tbody tr:hover {
+  background-color: rgba(255, 255, 255, 0.03) !important;
+}
+
+body.dark-mode table tbody td {
+  color: #e2e8f0 !important;
+}
+
+/* 9. بطاقات الإحصائيات والأيقونات */
+body.dark-mode *[style*="background: #e6fffa"],
+body.dark-mode *[style*="background: #b2f5ea"] {
+  background: rgba(0, 210, 180, 0.12) !important;
+}
+
+body.dark-mode *[style*="background: #eff6ff"],
+body.dark-mode *[style*="background: #dbeafe"] {
+  background: rgba(59, 130, 246, 0.12) !important;
+}
+
+body.dark-mode *[style*="background: #f0fdf4"],
+body.dark-mode *[style*="background: #dcfce7"] {
+  background: rgba(16, 185, 129, 0.12) !important;
+}
+
+body.dark-mode *[style*="background: #fef2f2"],
+body.dark-mode *[style*="background: #fee2e2"] {
+  background: rgba(239, 68, 68, 0.12) !important;
+}
+
+/* كروت الإشعارات غير المقروءة */
+body.dark-mode *[style*="background: #f0fdfa"] {
+  background-color: #0e222d !important;
+  border-color: rgba(0, 210, 180, 0.25) !important;
+}
+
+/* 10. حدود العناصر والخطوط الفاصلة */
+body.dark-mode .border-slate-100,
+body.dark-mode .border-slate-200,
+body.dark-mode *[style*="border: 1px solid #e2e8f0"],
+body.dark-mode *[style*="border: 1.5px solid #e2e8f0"],
+body.dark-mode *[style*="border: 1px solid #e5e7eb"],
+body.dark-mode *[style*="border-bottom: 1px solid #f1f5f9"],
+body.dark-mode *[style*="borderBottom: '1px solid #f1f5f9'"] {
+  border-color: rgba(255, 255, 255, 0.07) !important;
+}
+
+/* 11. النوافذ المنبثقة والقوائم المنسدلة (Modals & Dropdowns) */
+body.dark-mode .fixed.inset-0 > div,
+body.dark-mode *[style*="boxShadow"],
+body.dark-mode *[style*="box-shadow"] {
+  border-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+/* 12. شريط التمرير */
+::-webkit-scrollbar {
+  width: 7px;
+  height: 7px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 999px;
+}
+
+body.dark-mode ::-webkit-scrollbar-thumb {
+  background: #243048;
+}
+
+body.dark-mode ::-webkit-scrollbar-thumb:hover {
+  background: #00D2B4;
+}
