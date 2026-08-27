@@ -328,56 +328,41 @@ const ManageJobs = () => {
                   </div>
                 </div>
 
-                {/* 3 صفوف إحصائيات مع الأيقونات (مطابقة للفيجما) */}
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', borderTop: '1px solid #f8fafc', paddingTop: '10px' }}>
-                  {/* المتقدمين */}
+                {/* صفوف معلومات وإحصائيات الوظيفة الحقيقية */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', borderTop: '1px solid #f8fafc', paddingTop: '12px' }}>
+                  {/* المتقدمين الفعليين */}
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '13px' }}>
-                    <span style={{ fontWeight: 800, color: '#1D3557' }}>
-                      {applicantsCount}/{targetCount}
+                    <span style={{ fontWeight: 800, color: applicantsCount > 0 ? '#0f766e' : '#64748b', background: applicantsCount > 0 ? '#f0fdfa' : '#f8fafc', padding: '2px 10px', borderRadius: '8px' }}>
+                      {applicantsCount} {applicantsCount === 1 ? 'متقدم' : 'متقدمين'}
                     </span>
                     <span style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#64748b', fontWeight: 600 }}>
-                      المتقدمين <Users size={15} color="#94a3b8" />
+                      إجمالي المتقدمين <Users size={15} color="#94a3b8" />
                     </span>
                   </div>
+
+                  {/* القسم والتصنيف */}
+                  {job.category && (
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '13px' }}>
+                      <span style={{ fontWeight: 700, color: '#334155' }}>
+                        {job.category}
+                      </span>
+                      <span style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#64748b', fontWeight: 600 }}>
+                        المجال / التخصص <Briefcase size={15} color="#94a3b8" />
+                      </span>
+                    </div>
+                  )}
 
                   {/* الموعد النهائي */}
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '13px' }}>
-                    <span style={{ fontWeight: 700, color: '#475569' }}>
-                      {job.closingDate || '2024-05-31'}
-                    </span>
-                    <span style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#64748b', fontWeight: 600 }}>
-                      الموعد النهائي <Calendar size={15} color="#94a3b8" />
-                    </span>
-                  </div>
-
-                  {/* المشاهدات */}
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '13px' }}>
-                    <span style={{ fontWeight: 700, color: '#475569' }}>
-                      {viewsCount}
-                    </span>
-                    <span style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#64748b', fontWeight: 600 }}>
-                      المشاهدات <Eye size={15} color="#94a3b8" />
-                    </span>
-                  </div>
-                </div>
-
-                {/* شريط نسبة الملء (Progress Bar) */}
-                <div style={{ marginTop: '2px' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11px', color: '#64748b', fontWeight: 700, marginBottom: '6px' }}>
-                    <span>{fillPercentage}%</span>
-                    <span>نسبة الملء</span>
-                  </div>
-                  <div style={{ height: '7px', background: '#f1f5f9', borderRadius: '999px', overflow: 'hidden' }}>
-                    <div
-                      style={{
-                        height: '100%',
-                        width: `${fillPercentage}%`,
-                        background: '#00D2B4',
-                        borderRadius: '999px',
-                        transition: 'width 0.3s',
-                      }}
-                    />
-                  </div>
+                  {job.closingDate && (
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '13px' }}>
+                      <span style={{ fontWeight: 700, color: '#475569' }}>
+                        {formatDate(job.closingDate)}
+                      </span>
+                      <span style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#64748b', fontWeight: 600 }}>
+                        الموعد النهائي <Calendar size={15} color="#94a3b8" />
+                      </span>
+                    </div>
+                  )}
                 </div>
 
                 {/* زر عرض المتقدمين الفل ويدث باللون الأخضر الفاتح في الفيجما */}

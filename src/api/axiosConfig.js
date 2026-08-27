@@ -22,7 +22,7 @@ api.interceptors.request.use(
 );
 
 // 3. Interceptor: بعد كل رد من الـ Backend
-//    لو التوكن انتهت صلاحيته (401)، احذف البيانات المحلية وأعد توجيه المستخدم لتسجيل الدخول
+// معالجة جلسات المستخدم (401) وتنظيف أي رسائل أخطاء تقنية لتظهر كـ UX راقي ومفهوم
 api.interceptors.response.use(
   (response) => response,
   (error) => {
@@ -31,6 +31,19 @@ api.interceptors.response.use(
       localStorage.removeItem('user');
       window.location.href = '/login';
     }
+
+    // تنظيف رسائل الأخطاء لضمان عدم ظهور أي كود أو استثناء تقني للمستخدم
+    if (error.response?.data?.message) {
+      const raw = String(error.response.data.message);
+      if (/bufferCommands|findOne|ReferenceError|TypeError|Mongoose|MongoServer|Cannot call|at Timeout|_onTimeout|econnrefused|status code 500|not defined/i.test(raw)) {
+        error.response.data.message = 'حدث خطأ مؤقت أثناء معالجة الطلب، يرجى المحاولة مرة أخرى لاحقاً';
+      }
+    } else if (error.message === 'Network Error' || !error.response) {
+      if (!error.response) error.response = {};
+      if (!error.response.data) error.response.data = {};
+      error.response.data.message = 'تعذر الاتصال بالخادم، يرجى التأكد من اتصال الإنترنت';
+    }
+
     return Promise.reject(error);
   }
 );
