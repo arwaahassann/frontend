@@ -7,33 +7,40 @@ import {
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 
-const API = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+import api from '../api/axiosConfig';
 
 const Sidebar = ({ isOpen, onClose }) => {
   const { user, logout } = useAuth();
   const { isDarkMode, toggleDarkMode } = useTheme();
   const [unreadCount, setUnreadCount] = useState(0);
 
-  // جلب عدد الإشعارات غير المقروءة
+  // جلب عدد الإشعارات غير المقروءة تلقائياً للباحث والناشر
   useEffect(() => {
     if (!user) return;
-    const token = localStorage.getItem('token');
 
     const fetchUnread = () => {
-      fetch(`${API}/notifications`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-        .then(r => r.json())
-        .then(data => {
-          if (data.success) setUnreadCount(data.unreadCount || 0);
+      api.get('/api/notifications')
+        .then((res) => {
+          if (res.data?.success) {
+            setUnreadCount(res.data.unreadCount || 0);
+          }
         })
         .catch(() => {});
     };
 
     fetchUnread();
-    // تحديث كل دقيقة
-    const interval = setInterval(fetchUnread, 60000);
-    return () => clearInterval(interval);
+
+    // تحديث فوري عند قراءة أو حذف أي إشعار من صفحة الإشعارات
+    const handleNotificationUpdate = () => fetchUnread();
+    window.addEventListener('notificationUpdated', handleNotificationUpdate);
+
+    // فحص دوري كل 12 ثانية لجلب أي إشعارات جديدة فور ورودها
+    const interval = setInterval(fetchUnread, 12000);
+
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener('notificationUpdated', handleNotificationUpdate);
+    };
   }, [user]);
 
   // ================ قائمة الباحث عن عمل ================

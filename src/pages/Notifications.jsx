@@ -489,6 +489,7 @@ const Notifications = () => {
         setNotifications((prev) =>
           prev.map((n) => (n._id === notification._id ? { ...n, isRead: true } : n))
         );
+        window.dispatchEvent(new Event('notificationUpdated'));
       } catch (err) {
         console.error(err);
       }
@@ -500,6 +501,7 @@ const Notifications = () => {
     try {
       await api.put('/api/notifications/read-all');
       setNotifications((prev) => prev.map((n) => ({ ...n, isRead: true })));
+      window.dispatchEvent(new Event('notificationUpdated'));
     } catch { /* ignore */ }
   };
 
@@ -519,6 +521,7 @@ const Notifications = () => {
       if (selectedNotification?._id === id) {
         setSelectedNotification(null);
       }
+      window.dispatchEvent(new Event('notificationUpdated'));
     } catch (err) {
       alert('حدث خطأ أثناء حذف الإشعار');
     }
@@ -559,6 +562,7 @@ const Notifications = () => {
       if (selectedNotification && selectedIds.has(selectedNotification._id)) {
         setSelectedNotification(null);
       }
+      window.dispatchEvent(new Event('notificationUpdated'));
     } catch (err) {
       alert('حدث خطأ أثناء حذف الإشعارات المحددة');
     } finally {
