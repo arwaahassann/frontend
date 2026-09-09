@@ -231,3 +231,110 @@ body.dark-mode ::-webkit-scrollbar-thumb {
 body.dark-mode ::-webkit-scrollbar-thumb:hover {
   background: #00D2B4;
 }
+
+/* ========================================================
+   📱 نظام التجاوب الشامل مع كافة الشاشات والموبايل (Full Responsiveness)
+   ======================================================== */
+
+/* 1. ضبط الأساسيات لمنع أي انكسار أو Overflow جانبي */
+html, body {
+  overflow-x: hidden;
+  max-width: 100vw;
+}
+
+img, svg, video, canvas {
+  max-width: 100%;
+  height: auto;
+}
+
+/* 2. شاشات التابلت والأجهزة اللوحية (Tablet <= 1024px) */
+@media (max-width: 1024px) {
+  .main-content {
+    padding: 24px 20px !important;
+  }
+}
+
+/* 3. شاشات الهواتف والموبايل (Mobile <= 768px) */
+@media (max-width: 768px) {
+  /* الهيدر والقائمة الجانبية */
+  .mobile-header {
+    display: flex !important;
+  }
+
+  .main-content {
+    margin-right: 0 !important;
+    padding: 14px 12px !important;
+    width: 100% !important;
+  }
+
+  /* تحويل أي شبكة من عمودين أو تقسيمات ثابتة إلى عمود واحد مرن */
+  div[style*="gridTemplateColumns"],
+  div[style*="grid-template-columns"],
+  .job-details-grid {
+    grid-template-columns: 1fr !important;
+    gap: 14px !important;
+  }
+
+  /* النوافذ المنبثقة والمودالات (Modals) */
+  .fixed.inset-0 > div,
+  div[style*="position: 'fixed'"][style*="inset: 0"] > div,
+  div[style*="position: fixed"][style*="inset: 0"] > div,
+  div[style*="backdropFilter: 'blur'"] > div {
+    width: 95% !important;
+    max-width: 95vw !important;
+    max-height: 92vh !important;
+    padding: 16px !important;
+    margin: auto !important;
+    border-radius: 18px !important;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+
+  /* الأزرار وتوزيعها */
+  .modal-actions,
+  .applicant-card-actions {
+    flex-direction: column !important;
+    width: 100% !important;
+  }
+
+  /* الجداول والحاويات ذات البيانات العريضة */
+  table {
+    display: block !important;
+    width: 100% !important;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    white-space: nowrap !important;
+  }
+
+  /* تحسين أحجام الخطوط والعناوين */
+  h1 { font-size: 20px !important; }
+  h2 { font-size: 17px !important; }
+  h3 { font-size: 15px !important; }
+
+  /* الكروت والحاويات */
+  .card,
+  *[style*="borderRadius: '24px'"],
+  *[style*="border-radius: 24px"],
+  *[style*="borderRadius: '28px'"],
+  *[style*="border-radius: 28px"] {
+    border-radius: 16px !important;
+    padding: 16px !important;
+  }
+
+  /* حقول الإدخال */
+  input, select, textarea {
+    font-size: 13.5px !important;
+  }
+}
+
+/* 4. الهواتف الصغيرة جداً (Small Mobile <= 480px) */
+@media (max-width: 480px) {
+  .main-content {
+    padding: 10px 8px !important;
+  }
+
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 8px !important;
+  }
+}
