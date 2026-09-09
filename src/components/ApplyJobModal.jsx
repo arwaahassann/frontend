@@ -36,7 +36,6 @@ const ApplyJobModal = ({ job, existingApplication, onClose, onSuccess }) => {
     linkedinUrl: existingApplication?.linkedinUrl || '',
     portfolioUrl: existingApplication?.portfolioUrl || '',
     githubUrl: existingApplication?.githubUrl || '',
-    expectedSalary: existingApplication?.expectedSalary || '12,000 ج.م',
     availability: existingApplication?.availability || 'فوري',
     cvFile: null,
     cvFileName: existingApplication?.cvUrl ? 'السيرة الذاتية المرفقة' : '',
@@ -144,7 +143,6 @@ const ApplyJobModal = ({ job, existingApplication, onClose, onSuccess }) => {
         linkedinUrl: formData.linkedinUrl,
         portfolioUrl: formData.portfolioUrl,
         githubUrl: formData.githubUrl,
-        expectedSalary: formData.expectedSalary,
         availability: formData.availability,
         cvUrl: formData.cvBase64,
         notes: formData.notes,
@@ -570,39 +568,21 @@ const ApplyJobModal = ({ job, existingApplication, onClose, onSuccess }) => {
                     </div>
                   </div>
 
-                  {/* الراتب المتوقع + المباشرة */}
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-                    <div>
-                      <label style={labelStyle}>
-                        الراتب المتوقع <span style={{ color: '#ef4444' }}>*</span>
-                      </label>
-                      <input
-                        type="text"
-                        name="expectedSalary"
-                        value={formData.expectedSalary}
-                        onChange={handleChange}
-                        readOnly={isAlreadyApplied}
-                        placeholder="مثال: 15,000 ج.م"
-                        required
-                        style={inputStyle}
-                      />
-                    </div>
-
-                    <div>
-                      <label style={labelStyle}>
-                        تاريخ البدء المتاح <span style={{ color: '#ef4444' }}>*</span>
-                      </label>
-                      <input
-                        type="text"
-                        name="availability"
-                        value={formData.availability}
-                        onChange={handleChange}
-                        readOnly={isAlreadyApplied}
-                        placeholder="مثال: فوري / خلال أسبوعين"
-                        required
-                        style={inputStyle}
-                      />
-                    </div>
+                  {/* تاريخ البدء المتاح */}
+                  <div>
+                    <label style={labelStyle}>
+                      تاريخ البدء المتاح للعمل <span style={{ color: '#ef4444' }}>*</span>
+                    </label>
+                    <input
+                      type="text"
+                      name="availability"
+                      value={formData.availability}
+                      onChange={handleChange}
+                      readOnly={isAlreadyApplied}
+                      placeholder="مثال: فوري / خلال أسبوعين"
+                      required
+                      style={inputStyle}
+                    />
                   </div>
 
                   {/* رسالة التقديم (Cover Letter) */}

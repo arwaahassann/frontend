@@ -23,7 +23,7 @@ const CreateJob = () => {
     qualifications: '',
     jobType: 'دوام كامل',
     specialty: '',
-    degree: 'بكالوريوس',
+    degree: 'لا يشترط شهادة / بدون مؤهل',
     workTime: 'صباحي',
     location: user?.location || '',
     salary: '10,000 - 20,000 ج.م',
@@ -455,16 +455,13 @@ const CreateJob = () => {
             {/* صف 2: المؤهلات | النوع */}
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '18px' }}>
               <div>
-                <label style={labelStyle}>
-                  المؤهلات المطلوبة <span style={{ color: '#ef4444' }}>*</span>
-                </label>
+                <label style={labelStyle}>المؤهلات المطلوبة</label>
                 <input
                   type="text"
                   name="qualifications"
                   value={formData.qualifications}
                   onChange={handleChange}
-                  placeholder="مثال: بكالوريوس في التخصص / شهادة مزاولة مهنة"
-                  required
+                  placeholder="مثال: لا يشترط مؤهل محدد / خبرة عملية فقط / بكالوريوس"
                   style={inputStyle}
                 />
               </div>
@@ -494,7 +491,7 @@ const CreateJob = () => {
                   name="specialty"
                   value={formData.specialty}
                   onChange={handleChange}
-                  placeholder="التخصص الدقيق إن وجد"
+                  placeholder="التخصص الدقيق إن وجد (اختياري)"
                   style={inputStyle}
                 />
               </div>
@@ -503,10 +500,13 @@ const CreateJob = () => {
                 <label style={labelStyle}>الشهادة المطلوبة</label>
                 <div style={selectContainerStyle}>
                   <select name="degree" value={formData.degree} onChange={handleChange} style={selectStyle}>
-                    <option value="بكالوريوس">بكالوريوس</option>
+                    <option value="لا يشترط شهادة / بدون مؤهل">لا يشترط شهادة / بدون مؤهل</option>
+                    <option value="ثانوية عامة / ما يعادلها">ثانوية عامة / ما يعادلها</option>
+                    <option value="دبلوم متوسط / فني">دبلوم متوسط / فني</option>
+                    <option value="بكالوريوس / ليسانس">بكالوريوس / ليسانس</option>
                     <option value="ماجستير">ماجستير</option>
-                    <option value="دبلوم">دبلوم</option>
-                    <option value="شهادة مهنية">شهادة مهنية</option>
+                    <option value="دكتوراه">دكتوراه</option>
+                    <option value="شهادة مهنية / احترافية">شهادة مهنية / احترافية</option>
                   </select>
                   <ChevronDown size={18} color="#94a3b8" style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }} />
                 </div>

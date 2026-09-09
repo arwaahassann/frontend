@@ -217,19 +217,12 @@ const JobApplications = () => {
                     )}
                   </div>
 
-                  {/* تفاصيل الراتب والمباشرة */}
-                  {(app.expectedSalary || app.availability) && (
+                  {/* تفاصيل المباشرة */}
+                  {app.availability && (
                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px', margin: '8px 0', fontSize: '12px' }}>
-                      {app.expectedSalary && (
-                        <span style={{ background: '#ecfdf5', color: '#047857', border: '1px solid #a7f3d0', padding: '4px 10px', borderRadius: '8px', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '4px' }}>
-                          <DollarSign size={13} /> الراتب المتوقع: {app.expectedSalary}
-                        </span>
-                      )}
-                      {app.availability && (
-                        <span style={{ background: '#eff6ff', color: '#1d4ed8', border: '1px solid #bfdbfe', padding: '4px 10px', borderRadius: '8px', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '4px' }}>
-                          <Clock size={13} /> المباشرة: {app.availability}
-                        </span>
-                      )}
+                      <span style={{ background: '#eff6ff', color: '#1d4ed8', border: '1px solid #bfdbfe', padding: '4px 10px', borderRadius: '8px', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '4px' }}>
+                        <Clock size={13} /> المباشرة: {app.availability}
+                      </span>
                     </div>
                   )}
                 </div>

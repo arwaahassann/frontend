@@ -513,30 +513,19 @@ const ApplicantDetailsModal = ({ application, onClose, onStatusUpdated }) => {
 
           </div>
 
-          {/* 5. تفاصيل الراتب والمباشرة */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-            <div style={{ background: '#ecfdf5', border: '1px solid #a7f3d0', borderRadius: '14px', padding: '14px 18px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <div>
-                <span style={{ fontSize: '11px', color: '#047857', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '4px' }}>
-                  <DollarSign size={14} /> الراتب المتوقع
-                </span>
-                <p style={{ margin: '4px 0 0', fontSize: '15px', fontWeight: 900, color: '#065f46' }}>
-                  {application.expectedSalary || 'قابل للمفاوضة'}
-                </p>
-              </div>
-            </div>
-
+          {/* 5. تفاصيل إمكانية بدء العمل */}
+          {application.availability && (
             <div style={{ background: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: '14px', padding: '14px 18px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
               <div>
                 <span style={{ fontSize: '11px', color: '#1d4ed8', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '4px' }}>
-                  <Clock size={14} /> إمكانية بدء العمل
+                  <Clock size={14} /> إمكانية بدء العمل (المباشرة)
                 </span>
                 <p style={{ margin: '4px 0 0', fontSize: '15px', fontWeight: 900, color: '#1e40af' }}>
-                  {application.availability || 'فوري'}
+                  {application.availability}
                 </p>
               </div>
             </div>
-          </div>
+          )}
 
           {/* 6. المهارات والتقنيات */}
           {applicantSkills && (
