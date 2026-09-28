@@ -1,0 +1,311 @@
+import { NavLink } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import {
+  Home, Briefcase, FileText, Bookmark, Bell, X,
+  PlusCircle, List, Users, Settings, LogOut, Sun, Moon, ShieldCheck, MessageSquare
+} from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
+import ProfileImage from './ProfileImage';
+
+import api from '../api/axiosConfig';
+
+const Sidebar = ({ isOpen, onClose }) => {
+  const { user, logout } = useAuth();
+  const { isDarkMode, toggleDarkMode } = useTheme();
+  const [unreadCount, setUnreadCount] = useState(0);
+
+  // جلب عدد الإشعارات غير المقروءة تلقائياً للباحث والناشر
+  useEffect(() => {
+    if (!user) return;
+
+    const fetchUnread = () => {
+      api.get('/api/notifications?countOnly=true')
+        .then((res) => {
+          if (res.data?.success) {
+            setUnreadCount(res.data.unreadCount || 0);
+          }
+        })
+        .catch((error) => console.error('Failed to load unread notification count:', error.message));
+    };
+
+    fetchUnread();
+
+    // تحديث فوري عند قراءة أو حذف أي إشعار من صفحة الإشعارات
+    const handleNotificationUpdate = () => fetchUnread();
+    window.addEventListener('notificationUpdated', handleNotificationUpdate);
+
+    // فحص دوري كل 45 ثانية لجلب أي إشعارات جديدة فور ورودها
+    const interval = setInterval(fetchUnread, 45000);
+
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener('notificationUpdated', handleNotificationUpdate);
+    };
+  }, [user]);
+
+  // ================ قائمة الباحث عن عمل ================
+  const seekerItems = [
+    { name: 'الرئيسية',       icon: Home,      path: '/' },
+    { name: 'جميع الوظائف',   icon: Briefcase, path: '/jobs' },
+    { name: 'طلباتي',         icon: FileText,  path: '/applications' },
+    { name: 'قائمة المفضلات', icon: Bookmark,  path: '/favorites' },
+    { name: 'الاشعارات',      icon: Bell,      path: '/notifications', badge: unreadCount },
+    { name: 'الشكاوي والمقترحات', icon: MessageSquare, path: '/feedback' },
+  ];
+
+  // ================ قائمة مدير التوظيف ================
+  const employerItems = [
+    { name: 'الرئيسية',      icon: Home,       path: '/' },
+    { name: 'نشر وظيفة',     icon: PlusCircle, path: '/manage/new' },
+    { name: 'إدارة الوظائف', icon: List,       path: '/manage' },
+    { name: 'المتقدمين',     icon: Users,      path: '/manage/applicants' },
+    { name: 'الاشعارات',      icon: Bell,      path: '/notifications', badge: unreadCount },
+    { name: 'الشكاوي والمقترحات', icon: MessageSquare, path: '/feedback' },
+    { name: 'الإعدادات',     icon: Settings,   path: '/settings' },
+  ];
+
+  const adminItems = [
+    { name: 'لوحة المشرف', icon: ShieldCheck, path: '/admin' },
+  ];
+
+  let menuItems = seekerItems;
+  if (user?.role === 'employer') menuItems = employerItems;
+  if (user?.role === 'admin') menuItems = adminItems;
+
+  return (
+    <>
+      {/* Overlay for mobile */}
+      {isOpen && (
+        <div
+          onClick={onClose}
+          style={{
+            position: 'fixed', inset: 0,
+            background: 'rgba(0,0,0,0.5)', zIndex: 40,
+          }}
+        />
+      )}
+
+      <aside
+        dir="rtl"
+        style={{
+          position: 'fixed',
+          top: 0,
+          right: 0,
+          width: '240px',
+          height: '100vh',
+          background: '#1D3557',
+          display: 'flex',
+          flexDirection: 'column',
+          zIndex: 50,
+          fontFamily: 'Cairo, sans-serif',
+          transition: 'transform 0.3s ease',
+        }}
+      >
+        {/* Logo */}
+        <div style={{
+          padding: '20px',
+          borderBottom: '1px solid rgba(255,255,255,0.08)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+        }}>
+          <NavLink
+            to="/"
+            onClick={onClose}
+            aria-label="العودة إلى الصفحة الرئيسية"
+            style={{ color: '#fff', fontWeight: 900, fontSize: '18px', margin: 0, textDecoration: 'none' }}
+          >
+            وظيفة العمر
+          </NavLink>
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <button
+              type="button"
+              onClick={toggleDarkMode}
+              title={isDarkMode ? 'التحويل للوضع النهاري' : 'التحويل للوضع الليلي'}
+              style={{
+                background: 'rgba(255, 255, 255, 0.1)',
+                border: '1px solid rgba(255, 255, 255, 0.15)',
+                borderRadius: '8px',
+                width: '32px',
+                height: '32px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                cursor: 'pointer',
+                color: isDarkMode ? '#f59e0b' : '#00D2B4',
+                transition: 'all 0.2s',
+              }}
+            >
+              {isDarkMode ? <Sun size={16} /> : <Moon size={16} />}
+            </button>
+
+            <button
+              onClick={onClose}
+              className="sidebar-close"
+              style={{
+                background: 'none', border: 'none',
+                color: 'rgba(255,255,255,0.7)', cursor: 'pointer',
+                display: 'none',
+              }}
+            >
+              <X size={20} />
+            </button>
+          </div>
+        </div>
+
+        {/* Nav Links */}
+        <nav style={{
+          flex: 1,
+          padding: '16px 12px',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '4px',
+          overflowY: 'auto',
+        }}>
+          {menuItems.map((item) => (
+            <NavLink
+              key={item.path + item.name}
+              to={item.path}
+              onClick={() => {
+                // لما يفتح الإشعارات يصفر العداد مؤقتاً (الـ real count هيتحدث من الـ API)
+                if (item.path === '/notifications') setUnreadCount(0);
+                onClose();
+              }}
+              end
+              style={({ isActive }) => ({
+                display: 'flex',
+                alignItems: 'center',
+                gap: '12px',
+                padding: '11px 14px',
+                borderRadius: '10px',
+                textDecoration: 'none',
+                fontSize: '14px',
+                fontWeight: isActive ? 700 : 500,
+                fontFamily: 'Cairo, sans-serif',
+                background: isActive ? '#00D2B4' : 'transparent',
+                color: isActive ? '#fff' : 'rgba(255,255,255,0.7)',
+                transition: 'all 0.2s',
+                position: 'relative',
+              })}
+            >
+              {({ isActive }) => (
+                <>
+                  <item.icon size={18} />
+                  <span style={{ flex: 1 }}>{item.name}</span>
+
+                  {/* Badge عدد الإشعارات */}
+                  {item.badge > 0 && (
+                    <span style={{
+                      minWidth: '20px',
+                      height: '20px',
+                      borderRadius: '999px',
+                      background: isActive ? 'rgba(255,255,255,0.3)' : '#ef4444',
+                      color: '#fff',
+                      fontSize: '11px',
+                      fontWeight: 800,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      padding: '0 6px',
+                      lineHeight: 1,
+                      boxShadow: isActive ? 'none' : '0 0 0 2px rgba(239,68,68,0.25)',
+                      animation: 'badgePulse 2s ease-in-out infinite',
+                    }}>
+                      {item.badge > 99 ? '99+' : item.badge}
+                    </span>
+                  )}
+                </>
+              )}
+            </NavLink>
+          ))}
+        </nav>
+
+        {/* User Info + Logout */}
+        <div style={{
+          padding: '14px 16px',
+          borderTop: '1px solid rgba(255,255,255,0.08)',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '10px',
+          justifyContent: 'space-between',
+        }}>
+          {/* كارت المستخدم قابل للضغط للانتقال لملفي الشخصي */}
+          <NavLink
+            to="/profile"
+            onClick={onClose}
+            style={{
+              display: 'flex', alignItems: 'center', gap: '10px',
+              overflow: 'hidden', textDecoration: 'none', flex: 1,
+              padding: '6px 8px', borderRadius: '10px',
+              transition: 'background 0.2s', cursor: 'pointer',
+            }}
+            onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.08)'}
+            onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+          >
+            <div style={{
+              width: '38px', height: '38px', borderRadius: '50%',
+              background: '#00D2B4',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              fontWeight: 900, color: '#fff', fontSize: '15px', flexShrink: 0,
+              overflow: 'hidden', border: '1.5px solid #00D2B4',
+            }}>
+              <ProfileImage src={user?.avatar} alt={user?.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+            </div>
+            <div style={{ overflow: 'hidden' }}>
+              <p style={{
+                color: '#fff', fontWeight: 700, fontSize: '13px',
+                margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
+              }}>
+                {user?.name || 'أحمد محمد'}
+              </p>
+              <p style={{
+                color: '#00D2B4', fontSize: '11px', margin: 0,
+                fontWeight: 600, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
+              }}>
+                {user?.role === 'admin'
+                  ? 'مشرف المنصة'
+                  : user?.role === 'employer'
+                    ? (user?.company || user?.jobTitle || 'مسؤول التوظيف')
+                    : (user?.jobTitle || 'باحث عن عمل')}
+              </p>
+            </div>
+          </NavLink>
+
+          <button
+            onClick={logout}
+            title="تسجيل الخروج"
+            style={{
+              background: 'rgba(239,68,68,0.15)',
+              border: '1px solid rgba(239,68,68,0.3)',
+              borderRadius: '8px',
+              padding: '7px',
+              cursor: 'pointer',
+              color: '#ef4444',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              transition: 'all 0.2s',
+              flexShrink: 0,
+            }}
+          >
+            <LogOut size={16} />
+          </button>
+        </div>
+      </aside>
+
+      <style>{`
+        @media (max-width: 768px) {
+          aside { transform: translateX(${isOpen ? '0' : '100%'}) !important; }
+          .sidebar-close { display: flex !important; }
+        }
+
+        @keyframes badgePulse {
+          0%, 100% { transform: scale(1); }
+          50% { transform: scale(1.15); }
+        }
+      `}</style>
+    </>
+  );
+};
+
+export default Sidebar;
