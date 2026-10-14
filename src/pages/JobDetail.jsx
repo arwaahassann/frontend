@@ -142,23 +142,39 @@ const JobDetail = () => {
             )}
           </button>
 
-          <button
-            onClick={() => setShowApplyModal(true)}
-            style={{
-              padding: '10px 28px',
-              borderRadius: '10px',
-              border: 'none',
-              background: applied ? '#22c55e' : '#00FF66',
-              color: applied ? '#ffffff' : '#0f172a',
-              cursor: 'pointer',
-              fontSize: '14px',
-              fontWeight: 800,
-              fontFamily: 'Cairo, sans-serif',
-              boxShadow: applied ? 'none' : '0 4px 14px rgba(0, 255, 102, 0.4)',
-            }}
-          >
-            {applied ? 'تم التقديم ✓ (عرض الطلب)' : 'التقديم الآن'}
-          </button>
+          {job.status === 'closed' && !applied ? (
+            <div
+              role="status"
+              style={{
+                padding: '10px 16px',
+                borderRadius: '10px',
+                background: '#f1f5f9',
+                color: '#64748b',
+                fontSize: '14px',
+                fontWeight: 800,
+              }}
+            >
+              انتهى موعد التقديم
+            </div>
+          ) : (
+            <button
+              onClick={() => setShowApplyModal(true)}
+              style={{
+                padding: '10px 28px',
+                borderRadius: '10px',
+                border: 'none',
+                background: applied ? '#22c55e' : '#00FF66',
+                color: applied ? '#ffffff' : '#0f172a',
+                cursor: 'pointer',
+                fontSize: '14px',
+                fontWeight: 800,
+                fontFamily: 'Cairo, sans-serif',
+                boxShadow: applied ? 'none' : '0 4px 14px rgba(0, 255, 102, 0.4)',
+              }}
+            >
+              {applied ? 'تم التقديم ✓ (عرض الطلب)' : 'التقديم الآن'}
+            </button>
+          )}
         </div>
 
         {/* تفاصيل اللوجو والعنوان */}

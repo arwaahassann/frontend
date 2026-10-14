@@ -8,7 +8,6 @@ import { SEEKER } from '../api/endpoints';
 import { useAuth } from '../context/AuthContext';
 import LocationInput from '../components/LocationInput';
 import ForgotPasswordModal from '../components/ForgotPasswordModal';
-import CompanyGmailConnection from '../components/CompanyGmailConnection';
 import ProfileImage from '../components/ProfileImage';
 
 const SettingsPage = () => {
@@ -357,8 +356,6 @@ const SettingsPage = () => {
           {message.text}
         </div>
       )}
-
-      {isEmployer && <CompanyGmailConnection />}
 
       {/* Tabs */}
       <div style={{ display: 'flex', gap: '8px', padding: '6px', background: '#f1f5f9', borderRadius: '14px', marginBottom: '24px' }}>

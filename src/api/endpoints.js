@@ -48,8 +48,4 @@ export const EMPLOYER = {
   JOB_APPLICANTS: (jobId) => `/api/employer/applicants/job/${jobId}`,
   APPLICATION_DETAILS: (applicationId) => `/api/employer/applicants/${applicationId}/details`,
   UPDATE_STATUS: (appId) => `/api/employer/applicants/${appId}/status`,
-
-  GMAIL_STATUS: '/api/employer/gmail/status',
-  GMAIL_CONNECT_URL: '/api/employer/gmail/connect-url',
-  GMAIL_CONNECTION: '/api/employer/gmail/connection',
 };
