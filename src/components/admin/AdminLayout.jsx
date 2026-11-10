@@ -588,31 +588,67 @@ const AdminLayout = () => {
       </aside>
 
       <main className="admin-main" style={{ marginRight: '260px', padding: '32px 36px', minHeight: '100vh', boxSizing: 'border-box' }}>
-        <div ref={accountSearchRef} style={{ position: 'relative', maxWidth: '680px', margin: '0 0 28px auto', zIndex: 20 }}>
-          <label htmlFor="admin-account-search" style={{ display: 'block', marginBottom: '8px', color: '#334155', fontSize: '13px', fontWeight: 800 }}>
-            بحث عام عن حساب
-          </label>
-          <div style={{ position: 'relative' }}>
-            <Search size={18} aria-hidden="true" style={{ position: 'absolute', right: '14px', top: '50%', transform: 'translateY(-50%)', color: '#64748b' }} />
-            <input
-              id="admin-account-search"
-              type="search"
-              value={accountSearch}
-              onChange={(event) => setAccountSearch(event.target.value)}
-              onFocus={() => setAccountSearchOpen(true)}
-              placeholder="ابحث بالاسم أو رقم الهاتف أو البريد الإلكتروني"
-              autoComplete="off"
-              style={{ width: '100%', boxSizing: 'border-box', padding: '12px 42px 12px 14px', border: '1px solid #cbd5e1', borderRadius: '12px', background: '#fff', color: '#1e293b', fontFamily: 'Cairo, sans-serif', fontSize: '14px', outlineColor: '#00D2B4' }}
-            />
+        <div ref={accountSearchRef} className="admin-account-search">
+          <div className="admin-account-search__bar">
+            <div className="admin-account-search__intro">
+              <span className="admin-account-search__icon"><Search size={18} /></span>
+              <span>
+                <span className="admin-account-search__title">بحث عن حساب</span>
+                <span className="admin-account-search__hint">بالاسم أو رقم الهاتف أو البريد الإلكتروني</span>
+              </span>
+            </div>
+            <div className="admin-account-search__field">
+              <input
+                id="admin-account-search"
+                type="search"
+                value={accountSearch}
+                onChange={(event) => setAccountSearch(event.target.value)}
+                onFocus={() => setAccountSearchOpen(true)}
+                onKeyDown={(event) => {
+                  if (event.key === 'Escape') setAccountSearchOpen(false);
+                }}
+                placeholder="ابدأ بكتابة بيانات الحساب..."
+                autoComplete="off"
+                aria-label="بحث عام عن حساب بالاسم أو الهاتف أو البريد الإلكتروني"
+                aria-expanded={accountSearchOpen && accountSearch.trim().length >= 2}
+                aria-controls="admin-account-search-results"
+              />
+              {accountSearch ? (
+                <button
+                  type="button"
+                  className="admin-account-search__clear"
+                  onClick={() => {
+                    setAccountSearch('');
+                    setAccountSearchOpen(true);
+                  }}
+                  aria-label="مسح البحث"
+                >
+                  <X size={16} />
+                </button>
+              ) : (
+                <kbd className="admin-account-search__shortcut">بحث سريع</kbd>
+              )}
+            </div>
           </div>
+          {accountSearchOpen && accountSearch.trim().length < 2 && (
+            <div className="admin-account-search__popover admin-account-search__empty">
+              اكتبي حرفين على الأقل لبدء البحث
+            </div>
+          )}
           {accountSearchOpen && accountSearch.trim().length >= 2 && (
-            <div role="listbox" aria-label="نتائج البحث عن الحسابات" style={{ position: 'absolute', top: '100%', right: 0, left: 0, marginTop: '6px', maxHeight: 'min(60vh, 480px)', overflowY: 'auto', background: '#fff', border: '1px solid #e2e8f0', borderRadius: '14px', boxShadow: '0 16px 40px rgba(15, 23, 42, 0.16)' }}>
+            <div id="admin-account-search-results" role="listbox" aria-label="نتائج البحث عن الحسابات" className="admin-account-search__popover">
+              <div className="admin-account-search__results-heading">
+                <span>نتائج الحسابات</span>
+                {!accountSearchLoading && !accountSearchError && accountSearchResults.length > 0 && (
+                  <span>{accountSearchResults.length} نتائج</span>
+                )}
+              </div>
               {accountSearchLoading ? (
-                <p style={{ margin: 0, padding: '18px', color: '#64748b', fontSize: '13px', textAlign: 'center' }}>جاري البحث...</p>
+                <p role="status" className="admin-account-search__message">جاري البحث عن الحسابات...</p>
               ) : accountSearchError ? (
-                <p role="alert" style={{ margin: 0, padding: '18px', color: '#b91c1c', fontSize: '13px' }}>{accountSearchError}</p>
+                <p role="alert" className="admin-account-search__message admin-account-search__message--error">{accountSearchError}</p>
               ) : accountSearchResults.length === 0 ? (
-                <p style={{ margin: 0, padding: '18px', color: '#64748b', fontSize: '13px', textAlign: 'center' }}>لا توجد حسابات مطابقة</p>
+                <p className="admin-account-search__message">لا توجد حسابات مطابقة، جرّبي الاسم أو البريد أو رقم الهاتف.</p>
               ) : (
                 accountSearchResults.map((account) => (
                   <button
@@ -621,24 +657,24 @@ const AdminLayout = () => {
                     role="option"
                     aria-selected="false"
                     onClick={() => openAccount(account)}
-                    style={{ width: '100%', padding: '12px 14px', border: 0, borderBottom: '1px solid #f1f5f9', background: '#fff', display: 'flex', alignItems: 'center', gap: '12px', textAlign: 'right', cursor: 'pointer', fontFamily: 'Cairo, sans-serif' }}
+                    className="admin-account-search__result"
                   >
-                    <ProfileImage src={account.avatar} alt={account.name || 'الحساب'} style={{ width: '40px', height: '40px', borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }} />
-                    <span style={{ display: 'block', minWidth: 0, flex: 1 }}>
-                      <span style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '6px', color: '#1e293b', fontSize: '13px', fontWeight: 800 }}>
+                    <ProfileImage src={account.avatar} alt={account.name || 'الحساب'} className="admin-account-search__avatar" />
+                    <span className="admin-account-search__details">
+                      <span className="admin-account-search__name">
                         {account.name || account.company || 'حساب بدون اسم'}
-                        <span style={{ borderRadius: '999px', padding: '2px 8px', background: account.role === 'employer' ? '#ecfdf5' : '#eff6ff', color: account.role === 'employer' ? '#047857' : '#1d4ed8', fontSize: '10px' }}>
-                          {account.role === 'employer' ? 'شركة / صاحب عمل' : 'باحث عن عمل'}
+                        <span className={`admin-account-search__badge ${account.role === 'employer' ? 'is-employer' : 'is-seeker'}`}>
+                          {account.role === 'employer' ? 'شركة' : 'باحث عن عمل'}
                         </span>
                       </span>
                       {account.role === 'employer' && account.company && account.company !== account.name && (
-                        <span style={{ display: 'block', marginTop: '2px', color: '#475569', fontSize: '12px' }}>{account.company}</span>
+                        <span className="admin-account-search__company">{account.company}</span>
                       )}
-                      <span style={{ display: 'block', marginTop: '3px', color: '#64748b', fontSize: '11px', overflowWrap: 'anywhere' }}>
+                      <span className="admin-account-search__contact">
                         {[account.email, account.phone].filter(Boolean).join(' · ')}
                       </span>
                     </span>
-                    <span style={{ flexShrink: 0, color: '#0f766e', fontSize: '11px', fontWeight: 800 }}>عرض الحساب</span>
+                    <span className="admin-account-search__open">عرض الحساب</span>
                   </button>
                 ))
               )}
@@ -649,10 +685,254 @@ const AdminLayout = () => {
       </main>
 
       <style>{`
+        .admin-account-search {
+          position: sticky;
+          top: 12px;
+          z-index: 30;
+          max-width: 760px;
+          margin: 0 0 28px auto;
+        }
+        .admin-account-search__bar {
+          display: flex;
+          align-items: center;
+          gap: 20px;
+          padding: 14px 16px;
+          border: 1px solid #e2e8f0;
+          border-radius: 18px;
+          background: rgba(255,255,255,0.96);
+          box-shadow: 0 5px 18px rgba(15,23,42,0.06);
+          backdrop-filter: blur(12px);
+        }
+        .admin-account-search__intro {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          flex: 0 0 auto;
+          min-width: 185px;
+        }
+        .admin-account-search__icon {
+          display: grid;
+          width: 38px;
+          height: 38px;
+          place-items: center;
+          border-radius: 12px;
+          color: #0f766e;
+          background: #e6fffa;
+        }
+        .admin-account-search__title,
+        .admin-account-search__hint {
+          display: block;
+        }
+        .admin-account-search__title {
+          color: #1e293b;
+          font-size: 13px;
+          font-weight: 900;
+        }
+        .admin-account-search__hint {
+          margin-top: 2px;
+          color: #64748b;
+          font-size: 10px;
+          font-weight: 600;
+        }
+        .admin-account-search__field {
+          position: relative;
+          flex: 1;
+          min-width: 0;
+        }
+        .admin-account-search__field input {
+          width: 100%;
+          box-sizing: border-box;
+          height: 44px;
+          padding: 0 14px 0 82px;
+          border: 1px solid #e2e8f0;
+          border-radius: 12px;
+          outline: none;
+          background: #f8fafc;
+          color: #1e293b;
+          font-family: Cairo, sans-serif;
+          font-size: 13px;
+          transition: border-color 150ms ease, box-shadow 150ms ease, background 150ms ease;
+        }
+        .admin-account-search__field input:focus {
+          border-color: #00b89c;
+          background: #fff;
+          box-shadow: 0 0 0 3px rgba(0,210,180,0.13);
+        }
+        .admin-account-search__field input::placeholder {
+          color: #94a3b8;
+        }
+        .admin-account-search__shortcut,
+        .admin-account-search__clear {
+          position: absolute;
+          left: 10px;
+          top: 50%;
+          transform: translateY(-50%);
+        }
+        .admin-account-search__shortcut {
+          padding: 3px 7px;
+          border: 1px solid #e2e8f0;
+          border-radius: 7px;
+          background: #fff;
+          color: #94a3b8;
+          font-family: Cairo, sans-serif;
+          font-size: 10px;
+        }
+        .admin-account-search__clear {
+          display: grid;
+          width: 28px;
+          height: 28px;
+          place-items: center;
+          border: 0;
+          border-radius: 8px;
+          background: transparent;
+          color: #64748b;
+          cursor: pointer;
+        }
+        .admin-account-search__clear:hover {
+          background: #f1f5f9;
+          color: #334155;
+        }
+        .admin-account-search__popover {
+          position: absolute;
+          top: calc(100% + 8px);
+          right: 0;
+          left: 0;
+          max-height: min(60vh, 480px);
+          overflow-y: auto;
+          border: 1px solid #e2e8f0;
+          border-radius: 16px;
+          background: #fff;
+          box-shadow: 0 18px 48px rgba(15,23,42,0.16);
+        }
+        .admin-account-search__empty,
+        .admin-account-search__message {
+          margin: 0;
+          padding: 16px;
+          color: #64748b;
+          font-size: 12px;
+          text-align: center;
+        }
+        .admin-account-search__results-heading {
+          display: flex;
+          justify-content: space-between;
+          padding: 11px 14px;
+          border-bottom: 1px solid #f1f5f9;
+          color: #64748b;
+          font-size: 11px;
+          font-weight: 800;
+        }
+        .admin-account-search__message--error {
+          color: #b91c1c;
+        }
+        .admin-account-search__result {
+          display: flex;
+          width: 100%;
+          align-items: center;
+          gap: 12px;
+          padding: 12px 14px;
+          border: 0;
+          border-bottom: 1px solid #f1f5f9;
+          background: #fff;
+          text-align: right;
+          cursor: pointer;
+          font-family: Cairo, sans-serif;
+          transition: background 120ms ease;
+        }
+        .admin-account-search__result:last-child {
+          border-bottom: 0;
+        }
+        .admin-account-search__result:hover,
+        .admin-account-search__result:focus-visible {
+          outline: none;
+          background: #f8fafc;
+        }
+        .admin-account-search__avatar {
+          width: 42px;
+          height: 42px;
+          flex: 0 0 42px;
+          border: 1px solid #e2e8f0;
+          border-radius: 50%;
+          object-fit: cover;
+        }
+        .admin-account-search__details {
+          display: block;
+          min-width: 0;
+          flex: 1;
+        }
+        .admin-account-search__name {
+          display: flex;
+          align-items: center;
+          flex-wrap: wrap;
+          gap: 7px;
+          color: #1e293b;
+          font-size: 13px;
+          font-weight: 900;
+        }
+        .admin-account-search__badge {
+          padding: 2px 8px;
+          border-radius: 999px;
+          font-size: 10px;
+          font-weight: 800;
+        }
+        .admin-account-search__badge.is-employer {
+          background: #ecfdf5;
+          color: #047857;
+        }
+        .admin-account-search__badge.is-seeker {
+          background: #eff6ff;
+          color: #1d4ed8;
+        }
+        .admin-account-search__company {
+          display: block;
+          margin-top: 2px;
+          color: #475569;
+          font-size: 12px;
+        }
+        .admin-account-search__contact {
+          display: block;
+          margin-top: 3px;
+          color: #64748b;
+          font-size: 11px;
+          overflow-wrap: anywhere;
+        }
+        .admin-account-search__open {
+          flex: 0 0 auto;
+          color: #0f766e;
+          font-size: 11px;
+          font-weight: 800;
+        }
         @media (max-width: 768px) {
           .admin-sidebar { transform: translateX(${sidebarOpen ? '0' : '100%'}); transition: transform 0.3s ease; }
           .admin-main { margin-right: 0 !important; padding: 16px 12px !important; }
           .mobile-header { display: flex !important; }
+          .admin-account-search {
+            top: 60px;
+            max-width: none;
+            margin-bottom: 20px;
+          }
+          .admin-account-search__bar {
+            display: block;
+            padding: 10px;
+            border-radius: 15px;
+          }
+          .admin-account-search__intro {
+            min-width: 0;
+            margin-bottom: 8px;
+          }
+          .admin-account-search__icon {
+            width: 32px;
+            height: 32px;
+          }
+          .admin-account-search__hint {
+            font-size: 9px;
+          }
+          .admin-account-search__field input {
+            height: 42px;
+            font-size: 12px;
+          }
+          .admin-account-search__open {
+            display: none;
+          }
         }
       `}</style>
     </div>
