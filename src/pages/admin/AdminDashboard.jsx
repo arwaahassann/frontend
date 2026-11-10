@@ -1,4 +1,4 @@
-﻿import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Users,
@@ -8,6 +8,7 @@ import {
   Clock,
   Lock,
   XCircle,
+  CheckCircle,
   AlertCircle,
   RefreshCw,
 } from 'lucide-react';
@@ -22,18 +23,18 @@ const AdminDashboard = () => {
   const [data, setData] = useState({
     stats: {
       totalUsers: 0,
+      totalSeekers: 0,
       totalEmployers: 0,
       totalJobs: 0,
       totalApplications: 0,
+      applicationStatuses: { pending: 0, reviewing: 0, interview: 0, accepted: 0, rejected: 0 },
       activeJobs: 0,
       reviewingJobs: 0,
       closedJobs: 0,
       rejectedJobs: 0,
-      thisWeek: {
-        newUsers: 0,
-        newEmployers: 0,
-        newApplications: 0,
-      },
+      seekers: { active: 0, suspended: 0, reviewing: 0 },
+      employers: { active: 0, suspended: 0, reviewing: 0 },
+      thisWeek: { newUsers: 0, newEmployers: 0, newApplications: 0 },
     },
     activities: [],
   });
@@ -183,6 +184,141 @@ const AdminDashboard = () => {
           </button>
         </div>
       </div>
+
+      <div className="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-sm">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-base font-black text-slate-800 flex items-center gap-2">
+            <FileText className="w-5 h-5 text-amber-500" /> إحصائية طلبات التقديم
+          </h2>
+          <span className="text-2xl font-black text-amber-600">{loading ? '...' : (stats.totalApplications || 0).toLocaleString('en-US')}</span>
+        </div>
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+          <button type="button" onClick={() => navigate('/admin/applications?status=pending')} className="w-full font-sans text-slate-800 text-right cursor-pointer bg-white border border-slate-100 rounded-xl p-4 flex items-center justify-between hover:bg-slate-50/70 transition">
+            <div className="text-right">
+              <span className="text-xs font-bold text-slate-500 block mb-1">معلق</span>
+              <span className="text-xl font-black text-slate-800">{loading ? '...' : (stats.applicationStatuses?.pending || 0).toLocaleString('en-US')}</span>
+            </div>
+            <div className="w-10 h-10 rounded-lg bg-slate-100 text-slate-600 flex items-center justify-center shrink-0">
+              <FileText className="w-5 h-5" />
+            </div>
+          </button>
+          <button type="button" onClick={() => navigate('/admin/applications?status=reviewing')} className="w-full font-sans text-slate-800 text-right cursor-pointer bg-white border border-slate-100 rounded-xl p-4 flex items-center justify-between hover:bg-slate-50/70 transition">
+            <div className="text-right">
+              <span className="text-xs font-bold text-slate-500 block mb-1">قيد المراجعة</span>
+              <span className="text-xl font-black text-slate-800">{loading ? '...' : (stats.applicationStatuses?.reviewing || 0).toLocaleString('en-US')}</span>
+            </div>
+            <div className="w-10 h-10 rounded-lg bg-amber-50 text-amber-500 flex items-center justify-center shrink-0">
+              <Clock className="w-5 h-5" />
+            </div>
+          </button>
+          <button type="button" onClick={() => navigate('/admin/applications?status=interview')} className="w-full font-sans text-slate-800 text-right cursor-pointer bg-white border border-slate-100 rounded-xl p-4 flex items-center justify-between hover:bg-slate-50/70 transition">
+            <div className="text-right">
+              <span className="text-xs font-bold text-slate-500 block mb-1">مقابلة</span>
+              <span className="text-xl font-black text-slate-800">{loading ? '...' : (stats.applicationStatuses?.interview || 0).toLocaleString('en-US')}</span>
+            </div>
+            <div className="w-10 h-10 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
+              <Users className="w-5 h-5" />
+            </div>
+          </button>
+          <button type="button" onClick={() => navigate('/admin/applications?status=accepted')} className="w-full font-sans text-slate-800 text-right cursor-pointer bg-white border border-slate-100 rounded-xl p-4 flex items-center justify-between hover:bg-slate-50/70 transition">
+            <div className="text-right">
+              <span className="text-xs font-bold text-slate-500 block mb-1">مقبول</span>
+              <span className="text-xl font-black text-slate-800">{loading ? '...' : (stats.applicationStatuses?.accepted || 0).toLocaleString('en-US')}</span>
+            </div>
+            <div className="w-10 h-10 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
+              <CheckCircle className="w-5 h-5" />
+            </div>
+          </button>
+          <button type="button" onClick={() => navigate('/admin/applications?status=rejected')} className="w-full font-sans text-slate-800 text-right cursor-pointer bg-white border border-slate-100 rounded-xl p-4 flex items-center justify-between hover:bg-slate-50/70 transition">
+            <div className="text-right">
+              <span className="text-xs font-bold text-slate-500 block mb-1">مرفوض</span>
+              <span className="text-xl font-black text-slate-800">{loading ? '...' : (stats.applicationStatuses?.rejected || 0).toLocaleString('en-US')}</span>
+            </div>
+            <div className="w-10 h-10 rounded-lg bg-red-50 text-red-500 flex items-center justify-center shrink-0">
+              <XCircle className="w-5 h-5" />
+            </div>
+          </button>
+        </div>
+      </div>
+
+      {/* ── إحصائية الباحثين عن عمل ── */}
+      <div className="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-sm">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-base font-black text-slate-800 flex items-center gap-2">
+            <Users className="w-5 h-5 text-blue-500" /> إحصائية الباحثين عن عمل
+          </h2>
+          <span className="text-2xl font-black text-blue-600">{loading ? '...' : (stats.totalSeekers || 0).toLocaleString('en-US')}</span>
+        </div>
+        <div className="grid grid-cols-3 gap-3">
+          <button type="button" onClick={() => navigate('/admin/users?role=job_seeker&status=active')} className="w-full font-sans text-slate-800 text-right cursor-pointer bg-white border border-slate-100 rounded-xl p-4 flex items-center justify-between hover:bg-slate-50/70 transition">
+            <div className="text-right">
+              <span className="text-xs font-bold text-slate-500 block mb-1">نشط</span>
+              <span className="text-xl font-black text-slate-800">{loading ? '...' : (stats.seekers?.active || 0).toLocaleString('en-US')}</span>
+            </div>
+            <div className="w-10 h-10 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
+              <Users className="w-5 h-5" />
+            </div>
+          </button>
+          <button type="button" onClick={() => navigate('/admin/users?role=job_seeker&status=reviewing')} className="w-full font-sans text-slate-800 text-right cursor-pointer bg-white border border-slate-100 rounded-xl p-4 flex items-center justify-between hover:bg-slate-50/70 transition">
+            <div className="text-right">
+              <span className="text-xs font-bold text-slate-500 block mb-1">قيد المراجعة</span>
+              <span className="text-xl font-black text-slate-800">{loading ? '...' : (stats.seekers?.reviewing || 0).toLocaleString('en-US')}</span>
+            </div>
+            <div className="w-10 h-10 rounded-lg bg-amber-50 text-amber-500 flex items-center justify-center shrink-0">
+              <Clock className="w-5 h-5" />
+            </div>
+          </button>
+          <button type="button" onClick={() => navigate('/admin/users?role=job_seeker&status=suspended')} className="w-full font-sans text-slate-800 text-right cursor-pointer bg-white border border-slate-100 rounded-xl p-4 flex items-center justify-between hover:bg-slate-50/70 transition">
+            <div className="text-right">
+              <span className="text-xs font-bold text-slate-500 block mb-1">موقوف</span>
+              <span className="text-xl font-black text-slate-800">{loading ? '...' : (stats.seekers?.suspended || 0).toLocaleString('en-US')}</span>
+            </div>
+            <div className="w-10 h-10 rounded-lg bg-red-50 text-red-500 flex items-center justify-center shrink-0">
+              <XCircle className="w-5 h-5" />
+            </div>
+          </button>
+        </div>
+      </div>
+
+      {/* ── إحصائية أصحاب العمل ── */}
+      <div className="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-sm">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-base font-black text-slate-800 flex items-center gap-2">
+            <Building2 className="w-5 h-5 text-emerald-500" /> إحصائية أصحاب العمل (الشركات)
+          </h2>
+          <span className="text-2xl font-black text-emerald-600">{loading ? '...' : (stats.totalEmployers || 0).toLocaleString('en-US')}</span>
+        </div>
+        <div className="grid grid-cols-3 gap-3">
+          <button type="button" onClick={() => navigate('/admin/companies?status=active')} className="w-full font-sans text-slate-800 text-right cursor-pointer bg-white border border-slate-100 rounded-xl p-4 flex items-center justify-between hover:bg-slate-50/70 transition">
+            <div className="text-right">
+              <span className="text-xs font-bold text-slate-500 block mb-1">نشط</span>
+              <span className="text-xl font-black text-slate-800">{loading ? '...' : (stats.employers?.active || 0).toLocaleString('en-US')}</span>
+            </div>
+            <div className="w-10 h-10 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
+              <Building2 className="w-5 h-5" />
+            </div>
+          </button>
+          <button type="button" onClick={() => navigate('/admin/companies?status=reviewing')} className="w-full font-sans text-slate-800 text-right cursor-pointer bg-white border border-slate-100 rounded-xl p-4 flex items-center justify-between hover:bg-slate-50/70 transition">
+            <div className="text-right">
+              <span className="text-xs font-bold text-slate-500 block mb-1">قيد المراجعة</span>
+              <span className="text-xl font-black text-slate-800">{loading ? '...' : (stats.employers?.reviewing || 0).toLocaleString('en-US')}</span>
+            </div>
+            <div className="w-10 h-10 rounded-lg bg-amber-50 text-amber-500 flex items-center justify-center shrink-0">
+              <Clock className="w-5 h-5" />
+            </div>
+          </button>
+          <button type="button" onClick={() => navigate('/admin/companies?status=suspended')} className="w-full font-sans text-slate-800 text-right cursor-pointer bg-white border border-slate-100 rounded-xl p-4 flex items-center justify-between hover:bg-slate-50/70 transition">
+            <div className="text-right">
+              <span className="text-xs font-bold text-slate-500 block mb-1">موقوف</span>
+              <span className="text-xl font-black text-slate-800">{loading ? '...' : (stats.employers?.suspended || 0).toLocaleString('en-US')}</span>
+            </div>
+            <div className="w-10 h-10 rounded-lg bg-red-50 text-red-500 flex items-center justify-center shrink-0">
+              <XCircle className="w-5 h-5" />
+            </div>
+          </button>
+        </div>
+      </div>
+
     </div>
   );
 };

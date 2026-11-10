@@ -1,14 +1,20 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { Search, Loader2, AlertCircle } from 'lucide-react';
 import { getAdminApplications } from '../../api/admin';
 import AdminPagination from '../../components/admin/AdminPagination';
 import ProfileImage from '../../components/ProfileImage';
 
 const AdminApplications = () => {
+  const [searchParams] = useSearchParams();
+  const requestedStatus = searchParams.get('status');
+  const initialStatus = ['pending', 'reviewing', 'interview', 'accepted', 'rejected'].includes(requestedStatus)
+    ? requestedStatus
+    : 'all';
   const [applications, setApplications] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [statusFilter, setStatusFilter] = useState('all');
+  const [statusFilter, setStatusFilter] = useState(initialStatus);
   const [searchTerm, setSearchTerm] = useState('');
   const [appliedSearchTerm, setAppliedSearchTerm] = useState('');
   const [page, setPage] = useState(1);
