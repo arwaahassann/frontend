@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { Search, Loader2, AlertCircle, CheckCircle, Clock, ShieldAlert, MessageSquareWarning, Lightbulb } from 'lucide-react';
+import { Search, Loader2, AlertCircle, CheckCircle, Clock, ShieldAlert, MessageSquareWarning, Lightbulb, XCircle } from 'lucide-react';
 import { getAdminReports, updateAdminReportStatus } from '../../api/admin';
 import AdminPagination from '../../components/admin/AdminPagination';
 
@@ -10,17 +10,24 @@ const AdminReports = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [statusFilter, setStatusFilter] = useState(() => searchParams.get('status') || 'all');
-  const [typeFilter, setTypeFilter] = useState('all');
+  const [typeFilter, setTypeFilter] = useState(() => (
+    ['complaint', 'suggestion'].includes(searchParams.get('type'))
+      ? searchParams.get('type')
+      : 'complaint'
+  ));
   const [searchTerm, setSearchTerm] = useState(() => searchParams.get('search') || '');
   const [appliedSearchTerm, setAppliedSearchTerm] = useState(() => searchParams.get('search') || '');
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [stats, setStats] = useState({
-    pendingCount: 0,
-    reviewingCount: 0,
-    resolvedCount: 0,
     complaintCount: 0,
     suggestionCount: 0,
+    complaintOpenCount: 0,
+    complaintResolvedCount: 0,
+    complaintRejectedCount: 0,
+    suggestionOpenCount: 0,
+    suggestionResolvedCount: 0,
+    suggestionRejectedCount: 0,
   });
   const [updatingId, setUpdatingId] = useState(null);
   const [replyDrafts, setReplyDrafts] = useState({});
@@ -34,12 +41,10 @@ const AdminReports = () => {
     });
   };
 
-  const focusReportType = (nextType) => {
+  const selectReportType = (nextType) => {
     setTypeFilter(nextType);
+    setStatusFilter('all');
     setPage(1);
-    requestAnimationFrame(() => {
-      reportsListRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    });
   };
 
   const fetchReports = useCallback(async () => {
@@ -57,11 +62,14 @@ const AdminReports = () => {
         setReports(res.reports);
         setTotalPages(res.pages);
         setStats({
-          pendingCount: 0,
-          reviewingCount: 0,
-          resolvedCount: 0,
           complaintCount: 0,
           suggestionCount: 0,
+          complaintOpenCount: 0,
+          complaintResolvedCount: 0,
+          complaintRejectedCount: 0,
+          suggestionOpenCount: 0,
+          suggestionResolvedCount: 0,
+          suggestionRejectedCount: 0,
           ...res.stats,
         });
       }
@@ -74,6 +82,8 @@ const AdminReports = () => {
 
   useEffect(() => {
     setStatusFilter(searchParams.get('status') || 'all');
+    const requestedType = searchParams.get('type');
+    setTypeFilter(['complaint', 'suggestion'].includes(requestedType) ? requestedType : 'complaint');
     setSearchTerm(searchParams.get('search') || '');
     setAppliedSearchTerm(searchParams.get('search') || '');
     setPage(1);
@@ -120,6 +130,21 @@ const AdminReports = () => {
     return <span className="inline-block px-4 py-1 rounded-full text-xs font-bold bg-[#fef08a] text-[#a16207]">جديدة</span>;
   };
 
+  const activeTypeStats = typeFilter === 'complaint'
+    ? {
+        total: stats.complaintCount,
+        open: stats.complaintOpenCount,
+        resolved: stats.complaintResolvedCount,
+        rejected: stats.complaintRejectedCount,
+      }
+    : {
+        total: stats.suggestionCount,
+        open: stats.suggestionOpenCount,
+        resolved: stats.suggestionResolvedCount,
+        rejected: stats.suggestionRejectedCount,
+      };
+  const activeTypeLabel = typeFilter === 'complaint' ? 'الشكاوى' : 'المقترحات';
+
   return (
     <div className="space-y-6 max-w-7xl mx-auto">
       <div className="text-right">
@@ -127,69 +152,121 @@ const AdminReports = () => {
         <p className="text-sm md:text-base text-slate-500 mt-1 font-medium">متابعة بلاغات المستخدمين والرد عليها من لوحة المشرف</p>
       </div>
 
-      <div className="grid grid-cols-2 xl:grid-cols-4 gap-3 sm:gap-5">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <button
           type="button"
-          onClick={() => focusReports('open')}
-          aria-label={`عرض البلاغات قيد المتابعة: ${stats.pendingCount || 0}`}
-          className="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm flex items-center gap-4 text-right hover:border-amber-300 hover:shadow-md transition cursor-pointer"
+          onClick={() => selectReportType('complaint')}
+          aria-pressed={typeFilter === 'complaint'}
+          className={`rounded-2xl p-5 border shadow-sm flex items-center gap-4 text-right transition cursor-pointer ${
+            typeFilter === 'complaint'
+              ? 'bg-rose-50 border-rose-300 ring-2 ring-rose-100'
+              : 'bg-white border-slate-200 hover:border-rose-200 hover:shadow-md'
+          }`}
         >
-          <div className="w-12 h-12 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center shrink-0">
-            <Clock className="w-6 h-6" />
-          </div>
-          <div>
-            <span className="text-xs font-bold text-slate-400 block">قيد المتابعة</span>
-            <span className="text-2xl font-black text-slate-800">{stats.pendingCount || 0}</span>
-          </div>
-        </button>
-        <button
-          type="button"
-          onClick={() => focusReports('resolved')}
-          aria-label={`عرض البلاغات التي تم حلها: ${stats.resolvedCount || 0}`}
-          className="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm flex items-center gap-4 text-right hover:border-emerald-300 hover:shadow-md transition cursor-pointer"
-        >
-          <div className="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
-            <CheckCircle className="w-6 h-6" />
-          </div>
-          <div>
-            <span className="text-xs font-bold text-slate-400 block">تم حلها</span>
-            <span className="text-2xl font-black text-slate-800">{stats.resolvedCount || 0}</span>
-          </div>
-        </button>
-        <button
-          type="button"
-          onClick={() => focusReportType('complaint')}
-          aria-label={`عرض إجمالي الشكاوى: ${stats.complaintCount}`}
-          className="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm flex items-center gap-4 text-right hover:border-rose-300 hover:shadow-md transition cursor-pointer"
-        >
-          <div className="w-12 h-12 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center shrink-0">
+          <div className="w-12 h-12 rounded-xl bg-rose-100 text-rose-600 flex items-center justify-center shrink-0">
             <MessageSquareWarning className="w-6 h-6" />
           </div>
-          <div>
-            <span className="text-xs font-bold text-slate-400 block">إجمالي الشكاوى</span>
-            <span className="text-2xl font-black text-slate-800">{stats.complaintCount}</span>
+          <div className="flex-1">
+            <span className="text-base font-black text-slate-800 block">الشكاوى</span>
+            <span className="text-xs font-bold text-slate-500">متابعة الشكاوى والرد عليها</span>
+          </div>
+          <div className="text-2xl font-black text-slate-800">
+            {stats.complaintCount}
           </div>
         </button>
         <button
           type="button"
-          onClick={() => focusReportType('suggestion')}
-          aria-label={`عرض إحصائية المقترحات: ${stats.suggestionCount}`}
-          className="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm flex items-center gap-4 text-right hover:border-teal-300 hover:shadow-md transition cursor-pointer"
+          onClick={() => selectReportType('suggestion')}
+          aria-pressed={typeFilter === 'suggestion'}
+          className={`rounded-2xl p-5 border shadow-sm flex items-center gap-4 text-right transition cursor-pointer ${
+            typeFilter === 'suggestion'
+              ? 'bg-teal-50 border-teal-300 ring-2 ring-teal-100'
+              : 'bg-white border-slate-200 hover:border-teal-200 hover:shadow-md'
+          }`}
         >
-          <div className="w-12 h-12 rounded-xl bg-teal-50 text-teal-600 flex items-center justify-center shrink-0">
+          <div className="w-12 h-12 rounded-xl bg-teal-100 text-teal-600 flex items-center justify-center shrink-0">
             <Lightbulb className="w-6 h-6" />
           </div>
-          <div>
-            <span className="text-xs font-bold text-slate-400 block">إحصائية المقترحات</span>
-            <span className="text-2xl font-black text-slate-800">{stats.suggestionCount}</span>
+          <div className="flex-1">
+            <span className="text-base font-black text-slate-800 block">المقترحات</span>
+            <span className="text-xs font-bold text-slate-500">مراجعة أفكار ومقترحات المستخدمين</span>
+          </div>
+          <div className="text-2xl font-black text-slate-800">
+            {stats.suggestionCount}
           </div>
         </button>
       </div>
+
+      <section aria-label={`إحصائيات ${activeTypeLabel}`} className="space-y-4">
+        <div className="flex items-center justify-between gap-3">
+          <h2 className="text-lg font-black text-slate-800">{activeTypeLabel}</h2>
+          <span className="text-sm font-bold text-slate-500">الإجمالي: {activeTypeStats.total}</span>
+        </div>
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+          <button
+            type="button"
+            onClick={() => focusReports('all')}
+            aria-label={`عرض كل ${activeTypeLabel}: ${activeTypeStats.total}`}
+            className="bg-white rounded-xl p-4 border border-slate-200 shadow-sm flex items-center gap-3 text-right hover:border-blue-300 hover:shadow-md transition"
+          >
+            <div className="w-10 h-10 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
+              <ShieldAlert className="w-5 h-5" />
+            </div>
+            <div>
+              <span className="text-xs font-bold text-slate-400 block">الإجمالي</span>
+              <span className="text-xl font-black text-slate-800">{activeTypeStats.total}</span>
+            </div>
+          </button>
+          <button
+            type="button"
+            onClick={() => focusReports('open')}
+            aria-label={`عرض ${activeTypeLabel} قيد المتابعة: ${activeTypeStats.open}`}
+            className="bg-white rounded-xl p-4 border border-slate-200 shadow-sm flex items-center gap-3 text-right hover:border-amber-300 hover:shadow-md transition"
+          >
+            <div className="w-10 h-10 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center shrink-0">
+              <Clock className="w-5 h-5" />
+            </div>
+            <div>
+              <span className="text-xs font-bold text-slate-400 block">قيد المتابعة</span>
+              <span className="text-xl font-black text-slate-800">{activeTypeStats.open}</span>
+            </div>
+          </button>
+          <button
+            type="button"
+            onClick={() => focusReports('resolved')}
+            aria-label={`عرض ${activeTypeLabel} التي تم حلها: ${activeTypeStats.resolved}`}
+            className="bg-white rounded-xl p-4 border border-slate-200 shadow-sm flex items-center gap-3 text-right hover:border-emerald-300 hover:shadow-md transition"
+          >
+            <div className="w-10 h-10 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
+              <CheckCircle className="w-5 h-5" />
+            </div>
+            <div>
+              <span className="text-xs font-bold text-slate-400 block">تم الحل</span>
+              <span className="text-xl font-black text-slate-800">{activeTypeStats.resolved}</span>
+            </div>
+          </button>
+          <button
+            type="button"
+            onClick={() => focusReports('rejected')}
+            aria-label={`عرض ${activeTypeLabel} المغلقة: ${activeTypeStats.rejected}`}
+            className="bg-white rounded-xl p-4 border border-slate-200 shadow-sm flex items-center gap-3 text-right hover:border-red-300 hover:shadow-md transition"
+          >
+            <div className="w-10 h-10 rounded-lg bg-red-50 text-red-600 flex items-center justify-center shrink-0">
+              <XCircle className="w-5 h-5" />
+            </div>
+            <div>
+              <span className="text-xs font-bold text-slate-400 block">مغلقة</span>
+              <span className="text-xl font-black text-slate-800">{activeTypeStats.rejected}</span>
+            </div>
+          </button>
+        </div>
+      </section>
 
       <div className="flex flex-wrap items-center justify-start gap-6 border-b border-slate-200">
         {[
           { id: 'all', label: 'الكل' },
           { id: 'open', label: 'قيد المتابعة' },
+          { id: 'reviewing', label: 'قيد المراجعة' },
           { id: 'resolved', label: 'تم الحل' },
           { id: 'rejected', label: 'مغلقة' },
         ].map((st) => (
@@ -205,27 +282,6 @@ const AdminReports = () => {
             {st.label}
           </button>
         ))}
-      </div>
-
-      <div className="flex flex-wrap items-center gap-3">
-        <button
-          onClick={() => { setTypeFilter('all'); setPage(1); }}
-          className={`px-4 py-2 rounded-xl text-sm font-bold border ${typeFilter === 'all' ? 'bg-[#00D2B4] text-white border-[#00D2B4]' : 'bg-white text-slate-600 border-slate-200'}`}
-        >
-          الكل
-        </button>
-        <button
-          onClick={() => { setTypeFilter('complaint'); setPage(1); }}
-          className={`px-4 py-2 rounded-xl text-sm font-bold border ${typeFilter === 'complaint' ? 'bg-[#00D2B4] text-white border-[#00D2B4]' : 'bg-white text-slate-600 border-slate-200'}`}
-        >
-          شكاوى
-        </button>
-        <button
-          onClick={() => { setTypeFilter('suggestion'); setPage(1); }}
-          className={`px-4 py-2 rounded-xl text-sm font-bold border ${typeFilter === 'suggestion' ? 'bg-[#00D2B4] text-white border-[#00D2B4]' : 'bg-white text-slate-600 border-slate-200'}`}
-        >
-          مقترحات
-        </button>
       </div>
 
       <form onSubmit={handleSearchSubmit} className="max-w-xl">
@@ -257,8 +313,8 @@ const AdminReports = () => {
         ) : reports.length === 0 ? (
           <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-12 text-center">
             <ShieldAlert className="w-16 h-16 text-slate-300 mx-auto mb-3" />
-            <h3 className="text-lg font-bold text-slate-700">لا توجد شكاوى أو مقترحات في هذا القسم</h3>
-            <p className="text-sm text-slate-400 mt-1">ستظهر هنا فور إرسال المستخدمين رسائلهم من صفحة الشكاوي والمقترحات.</p>
+            <h3 className="text-lg font-bold text-slate-700">لا توجد {activeTypeLabel} في هذا القسم</h3>
+            <p className="text-sm text-slate-400 mt-1">ستظهر هنا فور إرسال المستخدمين {typeFilter === 'complaint' ? 'شكاواهم' : 'مقترحاتهم'}.</p>
           </div>
         ) : (
           reports.map((r) => (

@@ -22,7 +22,6 @@ const AdminDashboard = () => {
   const [error, setError] = useState('');
   const [data, setData] = useState({
     stats: {
-      totalUsers: 0,
       totalSeekers: 0,
       totalEmployers: 0,
       totalJobs: 0,
@@ -122,15 +121,6 @@ const AdminDashboard = () => {
           </span>
         </button>
 
-        <button type="button" onClick={() => navigate('/admin/users')} className="w-full cursor-pointer font-sans text-slate-800 bg-white rounded-2xl p-6 border border-slate-200/80 shadow-sm flex flex-col items-center justify-center text-center hover:shadow-md hover:-translate-y-0.5 transition">
-          <div className="w-12 h-12 rounded-xl flex items-center justify-center mb-3">
-            <Users className="w-8 h-8 text-blue-500" />
-          </div>
-          <span className="text-sm font-bold text-slate-600 mb-1">اجمالي المستخدمين</span>
-          <span className="text-3xl font-black text-slate-800 tracking-tight">
-            {loading ? '...' : (stats.totalUsers || 0).toLocaleString('en-US')}
-          </span>
-        </button>
       </div>
 
       <div className="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-sm">
