@@ -284,7 +284,7 @@ const AdminLayout = () => {
       return (
       <div
         key={item.key}
-        style={{ padding: '13px 18px', borderBottom: '1px solid #e2e8f0', background: isSelected ? '#e0f2fe' : item.isRead ? '#fff' : '#effaf8', borderRight: isSelected ? '4px solid #0284c7' : item.isRead ? '4px solid transparent' : '4px solid #00b89c', display: 'flex', alignItems: 'center', gap: '12px' }}
+        style={{ padding: '13px 18px', borderBottom: '1px solid #e2e8f0', background: isSelected ? '#e0f2fe' : item.isRead ? '#fff' : '#e6fffa', borderRight: isSelected ? '4px solid #0284c7' : item.isRead ? '4px solid transparent' : '4px solid #00D2B4', display: 'flex', alignItems: 'center', gap: '12px' }}
       >
         {selectionMode && (
           <input
