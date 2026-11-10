@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { NavLink, Outlet, useNavigate, useLocation } from 'react-router-dom';
 import {
   LayoutDashboard,
+  Users,
   Briefcase,
   Building2,
   Bookmark,
@@ -51,6 +52,7 @@ const AdminLayout = () => {
 
   const navItems = [
     { to: '/admin', end: true, label: 'الرئيسية', icon: LayoutDashboard },
+    { to: '/admin/seekers', label: 'الباحثون عن عمل', icon: Users },
     { to: '/admin/jobs', label: 'الوظائف', icon: Briefcase },
     { to: '/admin/companies', label: 'الشركات', icon: Building2 },
     { to: '/admin/applications', label: 'طلبات المتقدم', icon: Bookmark },

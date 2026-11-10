@@ -26,6 +26,7 @@ const JobApplications = lazy(() => import('./pages/employer/JobApplications'));
 const AllApplicants = lazy(() => import('./pages/employer/AllApplicants'));
 const AdminLayout = lazy(() => import('./components/admin/AdminLayout'));
 const AdminDashboard = lazy(() => import('./pages/admin/AdminDashboard'));
+const AdminSeekers = lazy(() => import('./pages/admin/AdminSeekers'));
 const AdminJobs = lazy(() => import('./pages/admin/AdminJobs'));
 const AdminCompanies = lazy(() => import('./pages/admin/AdminCompanies'));
 const AdminApplications = lazy(() => import('./pages/admin/AdminApplications'));
@@ -142,6 +143,7 @@ function App() {
             <Route element={<ProtectedRoute allowedRoles={['admin']} />}>
               <Route element={<AdminLayout />}>
                 <Route path="/admin"              element={<AdminDashboard />} />
+                <Route path="/admin/seekers"      element={<AdminSeekers />} />
                 <Route path="/admin/jobs"         element={<AdminJobs />} />
                 <Route path="/admin/companies"    element={<AdminCompanies />} />
                 <Route path="/admin/applications" element={<AdminApplications />} />

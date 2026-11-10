@@ -20,6 +20,16 @@ export const updateAdminCompanyStatus = async (id, status) => {
   return res.data;
 };
 
+export const getAdminSeekers = async (params = {}) => {
+  const res = await api.get('/api/admin/seekers', { params });
+  return res.data;
+};
+
+export const updateAdminSeekerStatus = async (id, status) => {
+  const res = await api.put(`/api/admin/seekers/${id}/status`, { status });
+  return res.data;
+};
+
 export const getAdminJobs = async (params = {}) => {
   const res = await api.get('/api/admin/jobs', { params });
   return res.data;
