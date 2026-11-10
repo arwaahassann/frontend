@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { Search, Loader2, AlertCircle, CheckCircle, Clock, ShieldAlert } from 'lucide-react';
+import { Search, Loader2, AlertCircle, CheckCircle, Clock, ShieldAlert, MessageSquareWarning, Lightbulb } from 'lucide-react';
 import { getAdminReports, updateAdminReportStatus } from '../../api/admin';
 import AdminPagination from '../../components/admin/AdminPagination';
 
@@ -15,14 +15,27 @@ const AdminReports = () => {
   const [appliedSearchTerm, setAppliedSearchTerm] = useState(() => searchParams.get('search') || '');
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const [totalCount, setTotalCount] = useState(0);
-  const [stats, setStats] = useState({ pendingCount: 0, reviewingCount: 0, resolvedCount: 0 });
+  const [stats, setStats] = useState({
+    pendingCount: 0,
+    reviewingCount: 0,
+    resolvedCount: 0,
+    complaintCount: 0,
+    suggestionCount: 0,
+  });
   const [updatingId, setUpdatingId] = useState(null);
   const [replyDrafts, setReplyDrafts] = useState({});
   const reportsListRef = useRef(null);
 
   const focusReports = (nextStatus) => {
     setStatusFilter(nextStatus);
+    setPage(1);
+    requestAnimationFrame(() => {
+      reportsListRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  };
+
+  const focusReportType = (nextType) => {
+    setTypeFilter(nextType);
     setPage(1);
     requestAnimationFrame(() => {
       reportsListRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -43,8 +56,14 @@ const AdminReports = () => {
       if (res.success) {
         setReports(res.reports);
         setTotalPages(res.pages);
-        setTotalCount(res.total);
-        setStats(res.stats || { pendingCount: 0, reviewingCount: 0, resolvedCount: 0 });
+        setStats({
+          pendingCount: 0,
+          reviewingCount: 0,
+          resolvedCount: 0,
+          complaintCount: 0,
+          suggestionCount: 0,
+          ...res.stats,
+        });
       }
     } catch (err) {
       setError(err.response?.data?.message || 'حدث خطأ في تحميل الشكاوي والمقترحات');
@@ -108,7 +127,7 @@ const AdminReports = () => {
         <p className="text-sm md:text-base text-slate-500 mt-1 font-medium">متابعة بلاغات المستخدمين والرد عليها من لوحة المشرف</p>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
+      <div className="grid grid-cols-2 xl:grid-cols-4 gap-3 sm:gap-5">
         <button
           type="button"
           onClick={() => focusReports('open')}
@@ -139,16 +158,30 @@ const AdminReports = () => {
         </button>
         <button
           type="button"
-          onClick={() => focusReports('all')}
-          aria-label={`عرض كل الرسائل: ${totalCount || 0}`}
-          className="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm flex items-center gap-4 text-right hover:border-blue-300 hover:shadow-md transition cursor-pointer"
+          onClick={() => focusReportType('complaint')}
+          aria-label={`عرض إجمالي الشكاوى: ${stats.complaintCount}`}
+          className="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm flex items-center gap-4 text-right hover:border-rose-300 hover:shadow-md transition cursor-pointer"
         >
-          <div className="w-12 h-12 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
-            <ShieldAlert className="w-6 h-6" />
+          <div className="w-12 h-12 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center shrink-0">
+            <MessageSquareWarning className="w-6 h-6" />
           </div>
           <div>
-            <span className="text-xs font-bold text-slate-400 block">إجمالي الرسائل</span>
-            <span className="text-2xl font-black text-slate-800">{totalCount || 0}</span>
+            <span className="text-xs font-bold text-slate-400 block">إجمالي الشكاوى</span>
+            <span className="text-2xl font-black text-slate-800">{stats.complaintCount}</span>
+          </div>
+        </button>
+        <button
+          type="button"
+          onClick={() => focusReportType('suggestion')}
+          aria-label={`عرض إحصائية المقترحات: ${stats.suggestionCount}`}
+          className="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm flex items-center gap-4 text-right hover:border-teal-300 hover:shadow-md transition cursor-pointer"
+        >
+          <div className="w-12 h-12 rounded-xl bg-teal-50 text-teal-600 flex items-center justify-center shrink-0">
+            <Lightbulb className="w-6 h-6" />
+          </div>
+          <div>
+            <span className="text-xs font-bold text-slate-400 block">إحصائية المقترحات</span>
+            <span className="text-2xl font-black text-slate-800">{stats.suggestionCount}</span>
           </div>
         </button>
       </div>
