@@ -134,6 +134,9 @@ const AdminDashboard = () => {
       </div>
 
       <div className="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-sm">
+        <h2 className="text-base font-black text-slate-800 flex items-center gap-2 mb-4">
+          <ShoppingBag className="w-5 h-5 text-purple-600" /> إحصائية الوظائف
+        </h2>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <button type="button" onClick={() => navigate('/admin/jobs?status=rejected')} className="w-full font-sans text-slate-800 text-right cursor-pointer bg-white border border-slate-100 rounded-xl p-4 flex items-center justify-between hover:bg-slate-50/70 transition">
             <div className="text-right">
