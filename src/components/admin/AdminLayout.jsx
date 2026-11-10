@@ -4,14 +4,12 @@ import {
   LayoutDashboard,
   Briefcase,
   Building2,
-  Users,
   Bookmark,
   FileSpreadsheet,
   LogOut,
   Menu,
   ShieldCheck,
   Bell,
-  User,
   AlertTriangle,
   X,
   Check,
@@ -22,7 +20,7 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import api from '../../api/axiosConfig';
-import { getAdminUsers } from '../../api/admin';
+import { searchAdminAccounts } from '../../api/admin';
 import ProfileImage from '../ProfileImage';
 
 const AdminLayout = () => {
@@ -49,12 +47,12 @@ const AdminLayout = () => {
   const [accountSearchLoading, setAccountSearchLoading] = useState(false);
   const [accountSearchError, setAccountSearchError] = useState('');
   const [accountSearchResults, setAccountSearchResults] = useState([]);
+  const [selectedAccount, setSelectedAccount] = useState(null);
 
   const navItems = [
     { to: '/admin', end: true, label: 'الرئيسية', icon: LayoutDashboard },
     { to: '/admin/jobs', label: 'الوظائف', icon: Briefcase },
     { to: '/admin/companies', label: 'الشركات', icon: Building2 },
-    { to: '/admin/users', label: 'المستخدمين', icon: Users },
     { to: '/admin/applications', label: 'طلبات المتقدم', icon: Bookmark },
     { to: '/admin/reports', label: 'الشكاوي والمقترحات', icon: FileSpreadsheet },
   ];
@@ -106,7 +104,6 @@ const AdminLayout = () => {
   const openAdminSection = (section, notificationKey, searchText) => {
     const [type, id] = (notificationKey || '').split(':');
     const destinations = {
-      user: { path: '/admin/users', params: { role: 'job_seeker' } },
       company: { path: '/admin/companies', params: { status: 'reviewing' } },
       job: { path: '/admin/jobs', params: { status: 'reviewing' } },
       report: { path: '/admin/reports', params: { status: 'all' } },
@@ -142,7 +139,7 @@ const AdminLayout = () => {
       try {
         setAccountSearchLoading(true);
         setAccountSearchError('');
-        const res = await getAdminUsers({ search: query, limit: 8 });
+        const res = await searchAdminAccounts(query);
         if (active) {
           if (!res.success) throw new Error(res.message || 'تعذر البحث عن الحسابات');
           setAccountSearchResults(res.users || []);
@@ -214,21 +211,23 @@ const AdminLayout = () => {
   }, [location.pathname]);
 
   const openAccount = (account) => {
-    const query = account.email || account.phone || account.name;
-    const params = new URLSearchParams({
-      role: account.role,
-      search: query,
-    });
     setAccountSearchOpen(false);
-    setAccountSearch('');
-    navigate(`/admin/users?${params.toString()}`);
+    setSelectedAccount(account);
   };
+
+  useEffect(() => {
+    if (!selectedAccount) return undefined;
+    const handleKeyDown = (event) => {
+      if (event.key === 'Escape') setSelectedAccount(null);
+    };
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [selectedAccount]);
 
   const totalPending = notificationCount;
 
   const tabs = [
     { key: 'all', label: 'الكل', icon: Bell },
-    { key: 'users', label: 'مستخدمون جدد', icon: User },
     { key: 'companies', label: 'شركات تحتاج موافقة', icon: Building2 },
     { key: 'jobs', label: 'وظائف معلقة', icon: Briefcase },
     { key: 'reports', label: 'شكاوي', icon: AlertTriangle },
@@ -251,16 +250,6 @@ const AdminLayout = () => {
     }
 
     const categoryItems = {
-      users: (notifData.newUsers || []).map(item => ({
-        key: item.notificationKey,
-        title: item.name,
-        description: item.email,
-        date: item.createdAt,
-        section: 'user',
-        entityId: item._id,
-        searchText: item.name,
-        isRead: item.isRead,
-      })),
       companies: (notifData.newCompanies || []).map(item => ({
         key: item.notificationKey,
         title: item.company || item.name,
@@ -371,7 +360,7 @@ const AdminLayout = () => {
               toggleNotifSelection(item.key);
             } else {
               if (!item.isRead) updateNotificationStates([item.key], 'read');
-              setNotifTab(({ user: 'users', company: 'companies', job: 'jobs', report: 'reports' })[item.section] || 'all');
+              setNotifTab(({ company: 'companies', job: 'jobs', report: 'reports' })[item.section] || 'all');
               openAdminSection(item.section, item.key, item.searchText);
             }
           }}
@@ -683,6 +672,47 @@ const AdminLayout = () => {
         </div>
         <Outlet />
       </main>
+
+      {selectedAccount && (
+        <div
+          role="presentation"
+          onMouseDown={(event) => {
+            if (event.target === event.currentTarget) setSelectedAccount(null);
+          }}
+          style={{ position: 'fixed', inset: 0, zIndex: 100, background: 'rgba(15,23,42,0.55)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}
+        >
+          <section
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="admin-account-details-title"
+            dir="rtl"
+            style={{ width: '100%', maxWidth: '480px', borderRadius: '20px', background: '#fff', padding: '24px', boxShadow: '0 24px 64px rgba(15,23,42,0.25)', fontFamily: 'Cairo, sans-serif' }}
+          >
+            <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '16px', marginBottom: '20px' }}>
+              <div>
+                <h2 id="admin-account-details-title" style={{ margin: 0, color: '#1e293b', fontSize: '18px', fontWeight: 900 }}>بيانات الحساب</h2>
+                <p style={{ margin: '4px 0 0', color: '#64748b', fontSize: '12px' }}>عرض فقط، إدارة الحسابات غير متاحة من هذه اللوحة</p>
+              </div>
+              <button type="button" onClick={() => setSelectedAccount(null)} aria-label="إغلاق بيانات الحساب" style={{ display: 'grid', placeItems: 'center', width: '34px', height: '34px', border: 0, borderRadius: '10px', background: '#f1f5f9', color: '#475569', cursor: 'pointer' }}>
+                <X size={18} />
+              </button>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', paddingBottom: '16px', borderBottom: '1px solid #e2e8f0', marginBottom: '16px' }}>
+              <ProfileImage src={selectedAccount.avatar} alt={selectedAccount.name || 'الحساب'} className="admin-account-search__avatar" />
+              <div>
+                <strong style={{ display: 'block', color: '#1e293b', fontSize: '15px' }}>{selectedAccount.name || selectedAccount.company || 'حساب بدون اسم'}</strong>
+                <span style={{ color: '#64748b', fontSize: '12px' }}>{selectedAccount.role === 'employer' ? 'شركة' : 'باحث عن عمل'}</span>
+              </div>
+            </div>
+            <div style={{ display: 'grid', gap: '12px', color: '#334155', fontSize: '13px' }}>
+              {selectedAccount.company && <p style={{ margin: 0 }}><strong>الشركة:</strong> {selectedAccount.company}</p>}
+              {selectedAccount.email && <p style={{ margin: 0, overflowWrap: 'anywhere' }}><strong>البريد الإلكتروني:</strong> {selectedAccount.email}</p>}
+              {selectedAccount.phone && <p style={{ margin: 0 }}><strong>رقم الهاتف:</strong> {selectedAccount.phone}</p>}
+              {selectedAccount.accountStatus && <p style={{ margin: 0 }}><strong>الحالة:</strong> {selectedAccount.accountStatus}</p>}
+            </div>
+          </section>
+        </div>
+      )}
 
       <style>{`
         .admin-account-search {

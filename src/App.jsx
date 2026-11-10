@@ -28,7 +28,6 @@ const AdminLayout = lazy(() => import('./components/admin/AdminLayout'));
 const AdminDashboard = lazy(() => import('./pages/admin/AdminDashboard'));
 const AdminJobs = lazy(() => import('./pages/admin/AdminJobs'));
 const AdminCompanies = lazy(() => import('./pages/admin/AdminCompanies'));
-const AdminUsers = lazy(() => import('./pages/admin/AdminUsers'));
 const AdminApplications = lazy(() => import('./pages/admin/AdminApplications'));
 const AdminReports = lazy(() => import('./pages/admin/AdminReports'));
 
@@ -145,7 +144,6 @@ function App() {
                 <Route path="/admin"              element={<AdminDashboard />} />
                 <Route path="/admin/jobs"         element={<AdminJobs />} />
                 <Route path="/admin/companies"    element={<AdminCompanies />} />
-                <Route path="/admin/users"        element={<AdminUsers />} />
                 <Route path="/admin/applications" element={<AdminApplications />} />
                 <Route path="/admin/reports"      element={<AdminReports />} />
               </Route>

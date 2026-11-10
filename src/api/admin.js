@@ -5,13 +5,8 @@ export const getAdminStats = async () => {
   return res.data;
 };
 
-export const getAdminUsers = async (params = {}) => {
-  const res = await api.get('/api/admin/users', { params });
-  return res.data;
-};
-
-export const updateAdminUserStatus = async (id, status) => {
-  const res = await api.put(`/api/admin/users/${id}/status`, { status });
+export const searchAdminAccounts = async (query) => {
+  const res = await api.get('/api/admin/account-search', { params: { search: query } });
   return res.data;
 };
 
