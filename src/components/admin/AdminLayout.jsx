@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { NavLink, Outlet, useNavigate } from 'react-router-dom';
+import { NavLink, Outlet, useNavigate, useLocation } from 'react-router-dom';
 import {
   LayoutDashboard,
   Briefcase,
@@ -26,6 +26,7 @@ import ProfileImage from '../ProfileImage';
 const AdminLayout = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [bellOpen, setBellOpen] = useState(false);
   const [notifTab, setNotifTab] = useState('all');
@@ -61,6 +62,9 @@ const AdminLayout = () => {
         throw new Error(res.data?.message || 'تعذر تحميل إشعارات الإدارة');
       }
       setNotifData(res.data);
+      if (res.data?.unreadCount !== undefined) {
+        setNotificationCount(res.data.unreadCount);
+      }
     } catch (error) {
       setNotifError(error.response?.data?.message || error.message || 'تعذر تحميل إشعارات الإدارة');
     }
@@ -83,7 +87,7 @@ const AdminLayout = () => {
         if (!res.data?.success) {
           throw new Error(res.data?.message || 'تعذر تحميل عدد الإشعارات');
         }
-        setNotificationCount(res.data.totalPending || 0);
+        setNotificationCount(res.data.unreadCount ?? res.data.totalPending ?? 0);
       } catch (error) {
         console.error('Failed to load admin notification count:', error.message);
       }
@@ -111,6 +115,10 @@ const AdminLayout = () => {
     setSelectedNotifKeys([]);
     navigate(`${destination.path}${params.size ? `?${params.toString()}` : ''}`);
   };
+
+  useEffect(() => {
+    fetchNotificationCount();
+  }, [location.pathname, fetchNotificationCount]);
 
   useEffect(() => {
     fetchNotificationCount();
@@ -322,9 +330,24 @@ const AdminLayout = () => {
         <NavLink to="/admin" aria-label="العودة إلى الصفحة الرئيسية للوحة المشرف" style={{ color: 'inherit', fontWeight: 900, fontSize: '16px', margin: 0, textDecoration: 'none' }}>
           وظيفة العمر
         </NavLink>
-        <button type="button" onClick={() => setSidebarOpen(true)} style={{ background: 'rgba(255,255,255,0.1)', border: 'none', borderRadius: '8px', padding: '8px', cursor: 'pointer', color: '#fff' }}>
-          <Menu size={20} />
-        </button>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <button
+            type="button"
+            onClick={() => setBellOpen((open) => !open)}
+            aria-label="إشعارات المشرف"
+            style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: '8px', padding: '8px', cursor: 'pointer', color: '#fff', position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+          >
+            <Bell size={18} />
+            {totalPending > 0 && (
+              <span style={{ position: 'absolute', top: '-6px', right: '-6px', background: '#ef4444', color: '#fff', fontSize: '10px', fontWeight: 800, fontVariantNumeric: 'tabular-nums', direction: 'ltr', borderRadius: '999px', minWidth: '18px', height: '18px', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0 4px', boxSizing: 'border-box', border: '2px solid #1D3557' }}>
+                {totalPending > 99 ? '99+' : totalPending}
+              </span>
+            )}
+          </button>
+          <button type="button" onClick={() => setSidebarOpen(true)} style={{ background: 'rgba(255,255,255,0.1)', border: 'none', borderRadius: '8px', padding: '8px', cursor: 'pointer', color: '#fff' }}>
+            <Menu size={20} />
+          </button>
+        </div>
       </header>
 
       <aside style={{ position: 'fixed', top: 0, right: 0, width: '260px', height: '100vh', background: '#1D3557', display: 'flex', flexDirection: 'column', zIndex: 50, fontFamily: 'Cairo, sans-serif' }} className="admin-sidebar">
