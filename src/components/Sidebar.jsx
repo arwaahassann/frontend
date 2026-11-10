@@ -169,8 +169,6 @@ const Sidebar = ({ isOpen, onClose }) => {
               key={item.path + item.name}
               to={item.path}
               onClick={() => {
-                // لما يفتح الإشعارات يصفر العداد مؤقتاً (الـ real count هيتحدث من الـ API)
-                if (item.path === '/notifications') setUnreadCount(0);
                 onClose();
               }}
               end
