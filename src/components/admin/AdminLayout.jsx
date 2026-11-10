@@ -18,9 +18,11 @@ import {
   CheckCheck,
   Trash2,
   Square,
+  Search,
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import api from '../../api/axiosConfig';
+import { getAdminUsers } from '../../api/admin';
 import ProfileImage from '../ProfileImage';
 
 const AdminLayout = () => {
@@ -37,10 +39,16 @@ const AdminLayout = () => {
   const [selectionMode, setSelectionMode] = useState(false);
   const [notifActionLoading, setNotifActionLoading] = useState(false);
   const bellRef = useRef(null);
+  const accountSearchRef = useRef(null);
   const notifRequestRef = useRef(false);
   const notifCountRequestRef = useRef(false);
   const notifCountRefreshPendingRef = useRef(false);
   const [notificationCount, setNotificationCount] = useState(0);
+  const [accountSearch, setAccountSearch] = useState('');
+  const [accountSearchOpen, setAccountSearchOpen] = useState(false);
+  const [accountSearchLoading, setAccountSearchLoading] = useState(false);
+  const [accountSearchError, setAccountSearchError] = useState('');
+  const [accountSearchResults, setAccountSearchResults] = useState([]);
 
   const navItems = [
     { to: '/admin', end: true, label: 'الرئيسية', icon: LayoutDashboard },
@@ -121,6 +129,41 @@ const AdminLayout = () => {
   }, [location.pathname, fetchNotificationCount]);
 
   useEffect(() => {
+    const query = accountSearch.trim();
+    if (!accountSearchOpen || query.length < 2) {
+      setAccountSearchResults([]);
+      setAccountSearchError('');
+      setAccountSearchLoading(false);
+      return undefined;
+    }
+
+    let active = true;
+    const timeoutId = setTimeout(async () => {
+      try {
+        setAccountSearchLoading(true);
+        setAccountSearchError('');
+        const res = await getAdminUsers({ search: query, limit: 8 });
+        if (active) {
+          if (!res.success) throw new Error(res.message || 'تعذر البحث عن الحسابات');
+          setAccountSearchResults(res.users || []);
+        }
+      } catch (error) {
+        if (active) {
+          setAccountSearchResults([]);
+          setAccountSearchError(error.response?.data?.message || error.message || 'تعذر البحث عن الحسابات');
+        }
+      } finally {
+        if (active) setAccountSearchLoading(false);
+      }
+    }, 250);
+
+    return () => {
+      active = false;
+      clearTimeout(timeoutId);
+    };
+  }, [accountSearch, accountSearchOpen]);
+
+  useEffect(() => {
     fetchNotificationCount();
     const refreshWhenVisible = () => {
       if (document.visibilityState === 'visible') fetchNotificationCount();
@@ -155,6 +198,31 @@ const AdminLayout = () => {
     document.addEventListener('mousedown', handler);
     return () => document.removeEventListener('mousedown', handler);
   }, []);
+
+  useEffect(() => {
+    const handler = (event) => {
+      if (accountSearchRef.current && !accountSearchRef.current.contains(event.target)) {
+        setAccountSearchOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, []);
+
+  useEffect(() => {
+    setAccountSearchOpen(false);
+  }, [location.pathname]);
+
+  const openAccount = (account) => {
+    const query = account.email || account.phone || account.name;
+    const params = new URLSearchParams({
+      role: account.role,
+      search: query,
+    });
+    setAccountSearchOpen(false);
+    setAccountSearch('');
+    navigate(`/admin/users?${params.toString()}`);
+  };
 
   const totalPending = notificationCount;
 
@@ -520,6 +588,63 @@ const AdminLayout = () => {
       </aside>
 
       <main className="admin-main" style={{ marginRight: '260px', padding: '32px 36px', minHeight: '100vh', boxSizing: 'border-box' }}>
+        <div ref={accountSearchRef} style={{ position: 'relative', maxWidth: '680px', margin: '0 0 28px auto', zIndex: 20 }}>
+          <label htmlFor="admin-account-search" style={{ display: 'block', marginBottom: '8px', color: '#334155', fontSize: '13px', fontWeight: 800 }}>
+            بحث عام عن حساب
+          </label>
+          <div style={{ position: 'relative' }}>
+            <Search size={18} aria-hidden="true" style={{ position: 'absolute', right: '14px', top: '50%', transform: 'translateY(-50%)', color: '#64748b' }} />
+            <input
+              id="admin-account-search"
+              type="search"
+              value={accountSearch}
+              onChange={(event) => setAccountSearch(event.target.value)}
+              onFocus={() => setAccountSearchOpen(true)}
+              placeholder="ابحث بالاسم أو رقم الهاتف أو البريد الإلكتروني"
+              autoComplete="off"
+              style={{ width: '100%', boxSizing: 'border-box', padding: '12px 42px 12px 14px', border: '1px solid #cbd5e1', borderRadius: '12px', background: '#fff', color: '#1e293b', fontFamily: 'Cairo, sans-serif', fontSize: '14px', outlineColor: '#00D2B4' }}
+            />
+          </div>
+          {accountSearchOpen && accountSearch.trim().length >= 2 && (
+            <div role="listbox" aria-label="نتائج البحث عن الحسابات" style={{ position: 'absolute', top: '100%', right: 0, left: 0, marginTop: '6px', maxHeight: 'min(60vh, 480px)', overflowY: 'auto', background: '#fff', border: '1px solid #e2e8f0', borderRadius: '14px', boxShadow: '0 16px 40px rgba(15, 23, 42, 0.16)' }}>
+              {accountSearchLoading ? (
+                <p style={{ margin: 0, padding: '18px', color: '#64748b', fontSize: '13px', textAlign: 'center' }}>جاري البحث...</p>
+              ) : accountSearchError ? (
+                <p role="alert" style={{ margin: 0, padding: '18px', color: '#b91c1c', fontSize: '13px' }}>{accountSearchError}</p>
+              ) : accountSearchResults.length === 0 ? (
+                <p style={{ margin: 0, padding: '18px', color: '#64748b', fontSize: '13px', textAlign: 'center' }}>لا توجد حسابات مطابقة</p>
+              ) : (
+                accountSearchResults.map((account) => (
+                  <button
+                    key={account._id}
+                    type="button"
+                    role="option"
+                    aria-selected="false"
+                    onClick={() => openAccount(account)}
+                    style={{ width: '100%', padding: '12px 14px', border: 0, borderBottom: '1px solid #f1f5f9', background: '#fff', display: 'flex', alignItems: 'center', gap: '12px', textAlign: 'right', cursor: 'pointer', fontFamily: 'Cairo, sans-serif' }}
+                  >
+                    <ProfileImage src={account.avatar} alt={account.name || 'الحساب'} style={{ width: '40px', height: '40px', borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }} />
+                    <span style={{ display: 'block', minWidth: 0, flex: 1 }}>
+                      <span style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '6px', color: '#1e293b', fontSize: '13px', fontWeight: 800 }}>
+                        {account.name || account.company || 'حساب بدون اسم'}
+                        <span style={{ borderRadius: '999px', padding: '2px 8px', background: account.role === 'employer' ? '#ecfdf5' : '#eff6ff', color: account.role === 'employer' ? '#047857' : '#1d4ed8', fontSize: '10px' }}>
+                          {account.role === 'employer' ? 'شركة / صاحب عمل' : 'باحث عن عمل'}
+                        </span>
+                      </span>
+                      {account.role === 'employer' && account.company && account.company !== account.name && (
+                        <span style={{ display: 'block', marginTop: '2px', color: '#475569', fontSize: '12px' }}>{account.company}</span>
+                      )}
+                      <span style={{ display: 'block', marginTop: '3px', color: '#64748b', fontSize: '11px', overflowWrap: 'anywhere' }}>
+                        {[account.email, account.phone].filter(Boolean).join(' · ')}
+                      </span>
+                    </span>
+                    <span style={{ flexShrink: 0, color: '#0f766e', fontSize: '11px', fontWeight: 800 }}>عرض الحساب</span>
+                  </button>
+                ))
+              )}
+            </div>
+          )}
+        </div>
         <Outlet />
       </main>
 
