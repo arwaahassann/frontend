@@ -22,6 +22,7 @@ const AdminDashboard = () => {
   const [error, setError] = useState('');
   const [data, setData] = useState({
     stats: {
+      totalSeekers: 0,
       totalEmployers: 0,
       totalJobs: 0,
       totalApplications: 0,
@@ -30,6 +31,7 @@ const AdminDashboard = () => {
       reviewingJobs: 0,
       closedJobs: 0,
       rejectedJobs: 0,
+      seekers: { active: 0, suspended: 0, reviewing: 0 },
       employers: { active: 0, suspended: 0, reviewing: 0 },
       thisWeek: { newEmployers: 0, newApplications: 0 },
     },
@@ -229,6 +231,52 @@ const AdminDashboard = () => {
               <XCircle className="w-5 h-5" />
             </div>
           </button>
+        </div>
+      </div>
+
+      <div className="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-sm">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-base font-black text-slate-800 flex items-center gap-2">
+            <Users className="w-5 h-5 text-blue-500" /> إحصائية الباحثين عن عمل
+          </h2>
+          <span className="text-2xl font-black text-blue-600">
+            {loading ? '...' : (stats.totalSeekers || 0).toLocaleString('en-US')}
+          </span>
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <div className="w-full font-sans text-slate-800 text-right bg-white border border-slate-100 rounded-xl p-4 flex items-center justify-between">
+            <div>
+              <span className="text-xs font-bold text-slate-500 block mb-1">نشط</span>
+              <span className="text-xl font-black text-slate-800">
+                {loading ? '...' : (stats.seekers?.active || 0).toLocaleString('en-US')}
+              </span>
+            </div>
+            <div className="w-10 h-10 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
+              <Users className="w-5 h-5" />
+            </div>
+          </div>
+          <div className="w-full font-sans text-slate-800 text-right bg-white border border-slate-100 rounded-xl p-4 flex items-center justify-between">
+            <div>
+              <span className="text-xs font-bold text-slate-500 block mb-1">قيد المراجعة</span>
+              <span className="text-xl font-black text-slate-800">
+                {loading ? '...' : (stats.seekers?.reviewing || 0).toLocaleString('en-US')}
+              </span>
+            </div>
+            <div className="w-10 h-10 rounded-lg bg-amber-50 text-amber-500 flex items-center justify-center shrink-0">
+              <Clock className="w-5 h-5" />
+            </div>
+          </div>
+          <div className="w-full font-sans text-slate-800 text-right bg-white border border-slate-100 rounded-xl p-4 flex items-center justify-between">
+            <div>
+              <span className="text-xs font-bold text-slate-500 block mb-1">موقوف</span>
+              <span className="text-xl font-black text-slate-800">
+                {loading ? '...' : (stats.seekers?.suspended || 0).toLocaleString('en-US')}
+              </span>
+            </div>
+            <div className="w-10 h-10 rounded-lg bg-red-50 text-red-500 flex items-center justify-center shrink-0">
+              <XCircle className="w-5 h-5" />
+            </div>
+          </div>
         </div>
       </div>
 
