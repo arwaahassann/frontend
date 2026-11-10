@@ -1,4 +1,4 @@
-﻿import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import api from '../../api/axiosConfig';
 import { EMPLOYER } from '../../api/endpoints';
 import {
@@ -20,24 +20,36 @@ const statusConfig = {
 
 const AllApplicants = () => {
   const [applications, setApplications] = useState([]);
+  const [totalApplicants, setTotalApplicants] = useState(0);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
   const [loading, setLoading] = useState(true);
   const [selectedApp, setSelectedApp] = useState(null);
   const [chatApp, setChatApp] = useState(null);
 
-  const fetchApplicants = async () => {
+  const fetchApplicants = useCallback(async (requestedPage) => {
     try {
-      const res = await api.get(EMPLOYER.ALL_APPLICANTS);
+      const res = await api.get(EMPLOYER.ALL_APPLICANTS, {
+        params: { page: requestedPage, limit: 20 },
+      });
+      const pages = res.data.pages || 1;
+      if (requestedPage > pages) {
+        setPage(pages);
+        return;
+      }
       setApplications(res.data.applications || []);
+      setTotalApplicants(res.data.total ?? res.data.applications?.length ?? 0);
+      setTotalPages(pages);
     } catch (err) {
       console.error(err);
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
-    fetchApplicants();
-  }, []);
+    fetchApplicants(page);
+  }, [fetchApplicants, page]);
 
   if (loading) {
     return (
@@ -55,7 +67,7 @@ const AllApplicants = () => {
             جميع المتقدمين 👥
           </h2>
           <p style={{ margin: '6px 0 0 0', color: '#64748b', fontSize: '13px' }}>
-            استعرض كافة بيانات المتقدمين، السير الذاتية (CV)، واتخذ قرارات القبول والرفض والمقابلات | الإجمالي: <strong style={{ color: '#00D2B4' }}>{applications.length}</strong>
+            استعرض بيانات المتقدمين، السير الذاتية (CV)، واتخذ قرارات القبول والرفض والمقابلات | الإجمالي: <strong style={{ color: '#00D2B4' }}>{totalApplicants}</strong>
           </p>
         </div>
 
@@ -193,6 +205,18 @@ const AllApplicants = () => {
               </div>
             );
           })}
+        </div>
+      )}
+
+      {totalPages > 1 && (
+        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '14px', marginTop: '24px' }}>
+          <button type="button" disabled={page <= 1} onClick={() => setPage((current) => current - 1)}>
+            السابق
+          </button>
+          <span>صفحة {page} من {totalPages}</span>
+          <button type="button" disabled={page >= totalPages} onClick={() => setPage((current) => current + 1)}>
+            التالي
+          </button>
         </div>
       )}
 
