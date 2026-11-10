@@ -81,12 +81,23 @@ const SeekerHome = ({ user, stats, loading }) => {
       {loading ? (
         <p style={{ color: '#9ca3af', textAlign: 'center' }}>جاري تحميل إحصائياتك...</p>
       ) : (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '14px' }}>
-          <StatCard label="إجمالي طلباتي" value={stats.applications} color="#00D2B4" icon={TrendingUp} />
-          <StatCard label="مقبول" value={stats.accepted} color="#22c55e" icon={CheckCircle} />
-          <StatCard label="قيد المراجعة" value={stats.reviewing} color="#f59e0b" icon={Clock} />
-          <StatCard label="مقابلة" value={stats.interviews} color="#3b82f6" icon={MessageSquare} />
-          <StatCard label="مرفوض" value={stats.rejected} color="#ef4444" icon={XCircle} />
+        <div style={{ background: '#fff', border: '1px solid #e2e8f0', borderRadius: '16px', padding: '18px 20px', boxShadow: '0 1px 3px rgba(0,0,0,0.03)' }}>
+          <h2 style={{ margin: '0 0 14px', fontSize: '14px', fontWeight: 800, color: '#1D3557' }}>إحصائية طلباتي</h2>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px' }}>
+            {[
+              { label: 'إجمالي طلباتي', value: stats.applications, color: '#00D2B4', bg: '#e6fffa', icon: '📋' },
+              { label: 'قيد المراجعة',  value: stats.reviewing,    color: '#f59e0b', bg: '#fffbeb', icon: '🔍' },
+              { label: 'مقابلة',         value: stats.interviews,   color: '#3b82f6', bg: '#eff6ff', icon: '📅' },
+              { label: 'مقبول',          value: stats.accepted,     color: '#16a34a', bg: '#f0fdf4', icon: '✅' },
+              { label: 'مرفوض',          value: stats.rejected,     color: '#ef4444', bg: '#fef2f2', icon: '❌' },
+            ].map(({ label, value, color, bg, icon }) => (
+              <div key={label} style={{ flex: '1 1 100px', minWidth: '90px', background: bg, borderRadius: '12px', padding: '12px 14px', textAlign: 'center', border: `1px solid ${color}22` }}>
+                <span style={{ fontSize: '18px' }}>{icon}</span>
+                <p style={{ margin: '4px 0 2px', fontSize: '11px', color: '#64748b', fontWeight: 700 }}>{label}</p>
+                <p style={{ margin: 0, fontSize: '24px', fontWeight: 900, color }}>{value}</p>
+              </div>
+            ))}
+          </div>
         </div>
       )}
 
@@ -140,6 +151,7 @@ const SeekerHome = ({ user, stats, loading }) => {
 const EmployerHome = ({ user }) => {
   const navigate = useNavigate();
   const [stats, setStats] = useState({ interviews: 0, applicants: 0, activeJobs: 0 });
+  const [applicantStats, setApplicantStats] = useState({ total: 0, pending: 0, reviewing: 0, interview: 0, accepted: 0, rejected: 0 });
   const [recentApps, setRecentApps] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedApp, setSelectedApp] = useState(null);
@@ -160,6 +172,13 @@ const EmployerHome = ({ user }) => {
       })
       .catch(() => {})
       .finally(() => setLoading(false));
+
+    // جلب إحصائية حالات المتقدمين
+    api.get(EMPLOYER.APPLICANT_STATS)
+      .then((res) => {
+        if (res.data.success && res.data.stats) setApplicantStats(res.data.stats);
+      })
+      .catch(() => {});
   };
 
   useEffect(() => {
@@ -325,7 +344,28 @@ const EmployerHome = ({ user }) => {
 
       </div>
 
-      {/* 3. وصول سريع للناشر */}
+      {/* 3. إحصائية حالات المتقدمين */}
+      <div style={{ background: '#fff', border: '1px solid #e2e8f0', borderRadius: '16px', padding: '18px 20px', boxShadow: '0 1px 3px rgba(0,0,0,0.03)' }}>
+        <h2 style={{ margin: '0 0 14px', fontSize: '14px', fontWeight: 800, color: '#1D3557' }}>إحصائية المتقدمين حسب الحالة</h2>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px' }}>
+          {[
+            { label: 'الكل', value: applicantStats.total, color: '#00D2B4', bg: '#e6fffa', icon: '📋' },
+            { label: 'قيد الانتظار', value: applicantStats.pending, color: '#f59e0b', bg: '#fffbeb', icon: '⏳' },
+            { label: 'قيد المراجعة', value: applicantStats.reviewing, color: '#3b82f6', bg: '#eff6ff', icon: '🔍' },
+            { label: 'مقابلة', value: applicantStats.interview, color: '#8b5cf6', bg: '#f5f3ff', icon: '📅' },
+            { label: 'مقبول', value: applicantStats.accepted, color: '#16a34a', bg: '#f0fdf4', icon: '✅' },
+            { label: 'مرفوض', value: applicantStats.rejected, color: '#ef4444', bg: '#fef2f2', icon: '❌' },
+          ].map(({ label, value, color, bg, icon }) => (
+            <div key={label} style={{ flex: '1 1 100px', minWidth: '90px', background: bg, borderRadius: '12px', padding: '12px 14px', textAlign: 'center', border: `1px solid ${color}22` }}>
+              <span style={{ fontSize: '18px' }}>{icon}</span>
+              <p style={{ margin: '4px 0 2px', fontSize: '11px', color: '#64748b', fontWeight: 700 }}>{label}</p>
+              <p style={{ margin: 0, fontSize: '24px', fontWeight: 900, color }}>{value}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* 4. وصول سريع للناشر */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '12px' }}>
         {employerQuickLinks.map(({ label, path, icon: Icon, color }) => (
           <button

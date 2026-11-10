@@ -48,4 +48,5 @@ export const EMPLOYER = {
   JOB_APPLICANTS: (jobId) => `/api/employer/applicants/job/${jobId}`,
   APPLICATION_DETAILS: (applicationId) => `/api/employer/applicants/${applicationId}/details`,
   UPDATE_STATUS: (appId) => `/api/employer/applicants/${appId}/status`,
+  APPLICANT_STATS: '/api/seeker/applications/employer/stats',
 };
