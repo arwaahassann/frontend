@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import {
   User, Lock, Trash2, Upload, Save, CheckCircle, AlertCircle, KeyRound, Building2,
-  Camera, X, Eye, EyeOff
+  Camera, X, Eye, EyeOff, FileText
 } from 'lucide-react';
 import api from '../api/axiosConfig';
 import { SEEKER } from '../api/endpoints';
@@ -13,6 +13,8 @@ import ProfileImage from '../components/ProfileImage';
 const SettingsPage = () => {
   const { user, updateUser } = useAuth();
   const avatarInputRef = useRef(null);
+  const commercialRegisterInputRef = useRef(null);
+  const taxCardInputRef = useRef(null);
   const messageRef = useRef(null);
 
   const [activeTab, setActiveTab] = useState('profile');
@@ -28,6 +30,7 @@ const SettingsPage = () => {
     companyIndustry: '',
     email: '',
     location: '',
+    detailedAddress: '',
     phone: '',
     bio: '',
     avatar: '',
@@ -49,6 +52,11 @@ const SettingsPage = () => {
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState({ text: '', type: '' });
   const [fileName, setFileName] = useState('');
+  const [companyDocuments, setCompanyDocuments] = useState({
+    commercialRegister: null,
+    taxCard: null,
+  });
+  const [documentLoading, setDocumentLoading] = useState('');
 
   const isEmployer = user?.role === 'employer';
   const normalizedPhone = formData.phone
@@ -73,10 +81,15 @@ const SettingsPage = () => {
           companyIndustry: u.companyIndustry || '',
           email: u.email || '',
           location: u.location || '',
+          detailedAddress: u.detailedAddress || '',
           phone: u.phone || '',
           bio: u.bio || '',
           avatar: u.avatar || '',
           cvUrl: u.cvUrl || '',
+        });
+        setCompanyDocuments({
+          commercialRegister: u.companyDocuments?.commercialRegister || null,
+          taxCard: u.companyDocuments?.taxCard || null,
         });
         setSkills(u.skills || []);
         setExperiences(u.experiences || []);
@@ -167,6 +180,66 @@ const SettingsPage = () => {
     reader.readAsDataURL(file);
   };
 
+  const handleCompanyDocumentUpload = async (event, documentType) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    event.target.value = '';
+
+    if (!['application/pdf', 'image/jpeg', 'image/png'].includes(file.type)) {
+      setMessage({ text: 'يرجى اختيار ملف PDF أو صورة JPG/PNG', type: 'error' });
+      return;
+    }
+    if (file.size > 3 * 1024 * 1024) {
+      setMessage({ text: 'حجم المستند يجب ألا يتجاوز 3 ميجابايت', type: 'error' });
+      return;
+    }
+
+    try {
+      setDocumentLoading(documentType);
+      setMessage({ text: '', type: '' });
+      const dataUrl = await new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = () => reject(new Error('تعذر قراءة الملف، يرجى المحاولة مرة أخرى'));
+        reader.readAsDataURL(file);
+      });
+      const res = await api.put(`/api/users/company-documents/${documentType}`, {
+        fileName: file.name,
+        mimeType: file.type,
+        dataUrl,
+      });
+      setCompanyDocuments((current) => ({ ...current, [documentType]: res.data.document }));
+      setMessage({ text: 'تم رفع المستند وحفظه بنجاح', type: 'success' });
+    } catch (error) {
+      setMessage({
+        text: error.response?.data?.message || error.message || 'تعذر رفع المستند',
+        type: 'error',
+      });
+    } finally {
+      setDocumentLoading('');
+    }
+  };
+
+  const handleCompanyDocumentDownload = async (documentType) => {
+    try {
+      setDocumentLoading(documentType);
+      const res = await api.get(`/api/users/company-documents/${documentType}`);
+      const link = document.createElement('a');
+      link.href = res.data.document.dataUrl;
+      link.download = res.data.document.fileName;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+    } catch (error) {
+      setMessage({
+        text: error.response?.data?.message || 'تعذر تحميل المستند',
+        type: 'error',
+      });
+    } finally {
+      setDocumentLoading('');
+    }
+  };
+
   const handleSaveProfile = async (e) => {
     e.preventDefault();
     setMessage({ text: '', type: '' });
@@ -185,6 +258,14 @@ const SettingsPage = () => {
     }
     if (!formData.location.trim()) {
       setMessage({ text: 'الموقع إلزامي', type: 'error' });
+      return;
+    }
+    if (isEmployer && !formData.detailedAddress.trim()) {
+      setMessage({ text: 'العنوان التفصيلي للشركة إلزامي', type: 'error' });
+      return;
+    }
+    if (isEmployer && formData.detailedAddress.trim().length > 300) {
+      setMessage({ text: 'العنوان التفصيلي لا يمكن أن يتجاوز 300 حرف', type: 'error' });
       return;
     }
     const phoneValue = normalizedPhone;
@@ -516,7 +597,7 @@ const SettingsPage = () => {
                 بيانات الشركة وجهة التوظيف
               </h2>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '16px' }}>
                 <div>
                   <label style={labelStyle}>
                     اسم الشركة / المؤسسة <span style={{ color: '#ef4444' }}>*</span>
@@ -599,7 +680,79 @@ const SettingsPage = () => {
                   />
                 </div>
 
-                <div style={{ gridColumn: 'span 2' }}>
+                <div style={{ gridColumn: '1 / -1' }}>
+                  <label style={labelStyle}>
+                    العنوان التفصيلي للشركة <span style={{ color: '#ef4444' }}>*</span>
+                  </label>
+                  <textarea
+                    name="detailedAddress"
+                    value={formData.detailedAddress}
+                    onChange={handleChange}
+                    maxLength={300}
+                    rows={3}
+                    required
+                    placeholder="الشارع، رقم المبنى، الدور، المنطقة، وأقرب علامة مميزة"
+                    style={{ ...inputStyle, resize: 'vertical' }}
+                  />
+                  <small style={{ display: 'block', marginTop: '4px', color: '#64748b', fontSize: '11px' }}>
+                    {formData.detailedAddress.length}/300 حرف
+                  </small>
+                </div>
+
+                <div style={{ gridColumn: '1 / -1' }}>
+                  <h3 style={{ margin: '0 0 6px', fontSize: '14px', fontWeight: 800, color: '#1D3557' }}>
+                    مستندات الشركة المطلوبة للاعتماد
+                  </h3>
+                  <p style={{ margin: '0 0 12px', fontSize: '11px', color: '#64748b' }}>
+                    ارفعي السجل التجاري والبطاقة الضريبية بصيغة PDF أو JPG أو PNG، بحد أقصى 3 ميجابايت لكل ملف.
+                  </p>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '12px' }}>
+                    {[
+                      { key: 'commercialRegister', label: 'السجل التجاري', inputRef: commercialRegisterInputRef },
+                      { key: 'taxCard', label: 'البطاقة الضريبية', inputRef: taxCardInputRef },
+                    ].map(({ key, label, inputRef }) => (
+                      <div key={key} style={{ border: '1px solid #e2e8f0', borderRadius: '12px', padding: '14px', background: '#f8fafc' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px', color: '#334155', fontSize: '12px', fontWeight: 800 }}>
+                          <FileText size={16} color="#00a990" />
+                          {label} <span style={{ color: '#ef4444' }}>*</span>
+                        </div>
+                        <p style={{ minHeight: '18px', margin: '0 0 10px', overflowWrap: 'anywhere', color: companyDocuments[key] ? '#0f766e' : '#94a3b8', fontSize: '11px', fontWeight: 700 }}>
+                          {companyDocuments[key]?.fileName || 'لم يتم رفع الملف بعد'}
+                        </p>
+                        <input
+                          ref={inputRef}
+                          type="file"
+                          accept=".pdf,.jpg,.jpeg,.png,application/pdf,image/jpeg,image/png"
+                          onChange={(event) => handleCompanyDocumentUpload(event, key)}
+                          style={{ display: 'none' }}
+                        />
+                        <div style={{ display: 'flex', gap: '8px' }}>
+                          <button
+                            type="button"
+                            onClick={() => inputRef.current?.click()}
+                            disabled={documentLoading === key}
+                            style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '6px', flex: 1, padding: '8px 10px', border: '1px solid #cbd5e1', borderRadius: '9px', background: '#fff', color: '#334155', fontFamily: 'Cairo, sans-serif', fontSize: '11px', fontWeight: 800, cursor: 'pointer', opacity: documentLoading === key ? 0.6 : 1 }}
+                          >
+                            <Upload size={14} />
+                            {documentLoading === key ? 'جاري الرفع...' : companyDocuments[key] ? 'استبدال الملف' : 'رفع الملف'}
+                          </button>
+                          {companyDocuments[key] && (
+                            <button
+                              type="button"
+                              onClick={() => handleCompanyDocumentDownload(key)}
+                              disabled={documentLoading === key}
+                              style={{ padding: '8px 10px', border: '1px solid #99f6e4', borderRadius: '9px', background: '#f0fdfa', color: '#0f766e', fontFamily: 'Cairo, sans-serif', fontSize: '11px', fontWeight: 800, cursor: 'pointer' }}
+                            >
+                              تحميل
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div style={{ gridColumn: '1 / -1' }}>
                   <label style={labelStyle}>نبذة تعريفية عن الشركة ومجال عملها</label>
                   <textarea
                     name="bio" value={formData.bio} onChange={handleChange} rows={4}

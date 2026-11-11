@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { Search, Loader2, AlertCircle, Eye, X, Building2, UserRound, Mail, Phone, MapPin, Globe, BriefcaseBusiness, CalendarDays } from 'lucide-react';
-import { getAdminCompanies, updateAdminCompanyStatus } from '../../api/admin';
+import { getAdminCompanies, getAdminCompanyDocument, updateAdminCompanyStatus } from '../../api/admin';
 import AdminPagination from '../../components/admin/AdminPagination';
 import ProfileImage from '../../components/ProfileImage';
 
@@ -18,6 +18,8 @@ const AdminCompanies = () => {
   const [totalCount, setTotalCount] = useState(0);
   const [updatingId, setUpdatingId] = useState(null);
   const [detailsCompany, setDetailsCompany] = useState(null);
+  const [downloadingDocument, setDownloadingDocument] = useState('');
+  const [documentError, setDocumentError] = useState('');
 
   const fetchCompanies = useCallback(async () => {
     try {
@@ -73,6 +75,27 @@ const AdminCompanies = () => {
       alert(err.response?.data?.message || 'تعذر تحديث حالة الشركة');
     } finally {
       setUpdatingId(null);
+    }
+  };
+
+  const handleDocumentDownload = async (companyId, documentType) => {
+    try {
+      setDownloadingDocument(documentType);
+      setDocumentError('');
+      const res = await getAdminCompanyDocument(companyId, documentType);
+      if (!res.success || !res.document?.dataUrl) {
+        throw new Error(res.message || 'المستند غير متاح');
+      }
+      const link = document.createElement('a');
+      link.href = res.document.dataUrl;
+      link.download = res.document.fileName;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+    } catch (err) {
+      setDocumentError(err.response?.data?.message || err.message || 'تعذر تحميل مستند الشركة');
+    } finally {
+      setDownloadingDocument('');
     }
   };
 
@@ -310,6 +333,7 @@ const AdminCompanies = () => {
                   { label: 'اسم الشركة', value: detailsCompany.company || detailsCompany.name, icon: Building2 },
                   { label: 'مجال العمل', value: detailsCompany.companyIndustry, icon: BriefcaseBusiness },
                   { label: 'الموقع', value: detailsCompany.location, icon: MapPin },
+                  { label: 'العنوان التفصيلي', value: detailsCompany.detailedAddress, icon: MapPin },
                   { label: 'الموقع الإلكتروني', value: detailsCompany.companyWebsite, icon: Globe },
                   { label: 'تاريخ التسجيل', value: formatCompanyDate(detailsCompany.createdAt), icon: CalendarDays },
                   { label: 'حالة الحساب', value: detailsCompany.accountStatus === 'reviewing' ? 'في انتظار الموافقة' : detailsCompany.accountStatus === 'active' ? 'معتمد' : 'معلق', icon: Building2 },
@@ -326,6 +350,48 @@ const AdminCompanies = () => {
                   </div>
                 ))}
               </div>
+
+              <h3 className="mb-3 mt-6 text-base font-black text-slate-800">مستندات الشركة</h3>
+              {documentError && (
+                <p role="alert" className="mb-3 rounded-lg border border-red-200 bg-red-50 p-3 text-sm font-bold text-red-700">
+                  {documentError}
+                </p>
+              )}
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                {[
+                  { key: 'commercialRegister', label: 'السجل التجاري' },
+                  { key: 'taxCard', label: 'البطاقة الضريبية' },
+                ].map(({ key, label }) => {
+                  const uploadedDocument = detailsCompany.companyDocuments?.[key];
+                  return (
+                    <div key={key} className="flex items-center justify-between gap-3 rounded-xl border border-slate-200 bg-white p-4">
+                      <div className="min-w-0">
+                        <p className="m-0 text-xs font-bold text-slate-500">{label}</p>
+                        <p className={`mt-1 break-all text-sm font-bold ${uploadedDocument ? 'text-slate-800' : 'text-rose-600'}`}>
+                          {uploadedDocument?.fileName || 'لم يتم الرفع'}
+                        </p>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => handleDocumentDownload(detailsCompany._id, key)}
+                        disabled={!uploadedDocument || downloadingDocument === key}
+                        className="shrink-0 rounded-lg bg-sky-50 px-3 py-2 text-xs font-bold text-sky-700 transition hover:bg-sky-100 disabled:cursor-not-allowed disabled:opacity-40"
+                      >
+                        {downloadingDocument === key ? 'جاري التحميل...' : 'تحميل'}
+                      </button>
+                    </div>
+                  );
+                })}
+              </div>
+              {detailsCompany.accountStatus === 'reviewing'
+                && (!detailsCompany.location
+                  || !detailsCompany.detailedAddress
+                  || !detailsCompany.companyDocuments?.commercialRegister
+                  || !detailsCompany.companyDocuments?.taxCard) && (
+                  <p className="mt-3 rounded-xl border border-amber-200 bg-amber-50 p-3 text-sm font-bold leading-6 text-amber-800">
+                    لا يمكن اعتماد الشركة قبل استكمال العنوان التفصيلي ورفع السجل التجاري والبطاقة الضريبية.
+                  </p>
+                )}
 
               <h3 className="mb-3 mt-6 text-base font-black text-slate-800">بيانات مسؤول الحساب</h3>
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
@@ -358,9 +424,14 @@ const AdminCompanies = () => {
                 </button>
                 <button
                   type="button"
-                  disabled={updatingId === detailsCompany._id}
+                  disabled={updatingId === detailsCompany._id
+                    || !detailsCompany.phone
+                    || !detailsCompany.location
+                    || !detailsCompany.detailedAddress
+                    || !detailsCompany.companyDocuments?.commercialRegister
+                    || !detailsCompany.companyDocuments?.taxCard}
                   onClick={() => handleStatusChange(detailsCompany._id, 'active')}
-                  className="rounded-xl bg-emerald-600 px-5 py-2.5 text-sm font-bold text-white transition hover:bg-emerald-700 disabled:opacity-50"
+                  className="rounded-xl bg-emerald-600 px-5 py-2.5 text-sm font-bold text-white transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   {updatingId === detailsCompany._id ? 'جاري الاعتماد...' : 'اعتماد الشركة'}
                 </button>
