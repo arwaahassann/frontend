@@ -42,7 +42,7 @@ const Register = () => {
       if (fieldName === 'phone' && (!formData.phone || formData.phone.trim().length < 8)) return '#ef4444';
       if (fieldName === 'password' && (!formData.password || formData.password.length < 8)) return '#ef4444';
       if (role === 'employer' && fieldName === 'company' && (!formData.company || formData.company.trim().length < 2)) return '#ef4444';
-      if (role === 'employer' && fieldName === 'detailedAddress' && !formData.detailedAddress.trim()) return '#ef4444';
+      if (fieldName === 'detailedAddress' && !formData.detailedAddress.trim()) return '#ef4444';
     }
     return '#e2e8f0';
   };
@@ -65,13 +65,13 @@ const Register = () => {
     if (role === 'employer' && (!formData.company || formData.company.trim().length < 2)) {
       newErrors.push({ message: 'اسم الشركة إلزامي لحسابات أصحاب العمل' });
     }
-    if (role === 'employer' && !formData.location.trim()) {
-      newErrors.push({ message: 'مدينة / مقر الشركة إلزامي' });
+    if (!formData.location.trim()) {
+      newErrors.push({ message: 'المحافظة / المدينة إلزامية' });
     }
-    if (role === 'employer' && !formData.detailedAddress.trim()) {
-      newErrors.push({ message: 'العنوان التفصيلي للشركة إلزامي' });
+    if (!formData.detailedAddress.trim()) {
+      newErrors.push({ message: 'العنوان التفصيلي إلزامي' });
     }
-    if (role === 'employer' && formData.detailedAddress.trim().length > 300) {
+    if (formData.detailedAddress.trim().length > 300) {
       newErrors.push({ message: 'العنوان التفصيلي لا يمكن أن يتجاوز 300 حرف' });
     }
     const isStrongPass =
@@ -293,40 +293,38 @@ const Register = () => {
             </div>
           </div>
 
-          {role === 'employer' && (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-              <div>
-                <label style={labelStyle}>
-                  المحافظة / المدينة <span style={{ color: '#ef4444' }}>*</span>
-                </label>
-                <LocationInput
-                  name="location"
-                  value={formData.location}
-                  onChange={handleChange}
-                  placeholder="اختر المدينة أو المحافظة"
-                  required
-                />
-              </div>
-              <div>
-                <label style={labelStyle}>
-                  العنوان التفصيلي للشركة <span style={{ color: '#ef4444' }}>*</span>
-                </label>
-                <textarea
-                  name="detailedAddress"
-                  value={formData.detailedAddress}
-                  onChange={handleChange}
-                  maxLength={300}
-                  rows={3}
-                  required
-                  placeholder="الشارع، رقم المبنى، الدور، المنطقة، وأقرب علامة مميزة"
-                  style={{ ...inputStyle('detailedAddress'), resize: 'vertical', paddingRight: '14px' }}
-                />
-                <small style={{ display: 'block', marginTop: '4px', color: '#64748b', fontSize: '11px' }}>
-                  {formData.detailedAddress.length}/300 حرف
-                </small>
-              </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+            <div>
+              <label style={labelStyle}>
+                المحافظة / المدينة <span style={{ color: '#ef4444' }}>*</span>
+              </label>
+              <LocationInput
+                name="location"
+                value={formData.location}
+                onChange={handleChange}
+                placeholder="اختر من القائمة أو اكتب المحافظة / المدينة"
+                required
+              />
             </div>
-          )}
+            <div>
+              <label style={labelStyle}>
+                العنوان التفصيلي {role === 'employer' ? 'للشركة' : 'للباحث عن عمل'} <span style={{ color: '#ef4444' }}>*</span>
+              </label>
+              <textarea
+                name="detailedAddress"
+                value={formData.detailedAddress}
+                onChange={handleChange}
+                maxLength={300}
+                rows={3}
+                required
+                placeholder="اكتب الشارع، رقم المبنى، المنطقة، وأقرب علامة مميزة"
+                style={{ ...inputStyle('detailedAddress'), resize: 'vertical', paddingRight: '14px' }}
+              />
+              <small style={{ display: 'block', marginTop: '4px', color: '#64748b', fontSize: '11px' }}>
+                {formData.detailedAddress.length}/300 حرف
+              </small>
+            </div>
+          </div>
 
           {/* الصف الثالث: كلمة المرور + تأكيد كلمة المرور */}
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>

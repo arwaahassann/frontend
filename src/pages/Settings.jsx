@@ -260,11 +260,11 @@ const SettingsPage = () => {
       setMessage({ text: 'الموقع إلزامي', type: 'error' });
       return;
     }
-    if (isEmployer && !formData.detailedAddress.trim()) {
-      setMessage({ text: 'العنوان التفصيلي للشركة إلزامي', type: 'error' });
+    if (!formData.detailedAddress.trim()) {
+      setMessage({ text: 'العنوان التفصيلي إلزامي', type: 'error' });
       return;
     }
-    if (isEmployer && formData.detailedAddress.trim().length > 300) {
+    if (formData.detailedAddress.trim().length > 300) {
       setMessage({ text: 'العنوان التفصيلي لا يمكن أن يتجاوز 300 حرف', type: 'error' });
       return;
     }
@@ -669,20 +669,20 @@ const SettingsPage = () => {
 
                 <div>
                   <label style={labelStyle}>
-                    المقر الرئيسي / المدينة <span style={{ color: '#ef4444' }}>*</span>
+                    {isEmployer ? 'المقر الرئيسي / المدينة' : 'المحافظة / المدينة'} <span style={{ color: '#ef4444' }}>*</span>
                   </label>
                   <LocationInput
                     name="location"
                     value={formData.location}
                     onChange={handleChange}
-                    placeholder="اختر من القائمة أو اكتب مقر الشركة"
+                    placeholder={isEmployer ? 'اختر من القائمة أو اكتب مقر الشركة' : 'اختر من القائمة أو اكتب المحافظة / المدينة'}
                     required
                   />
                 </div>
 
                 <div style={{ gridColumn: '1 / -1' }}>
                   <label style={labelStyle}>
-                    العنوان التفصيلي للشركة <span style={{ color: '#ef4444' }}>*</span>
+                    العنوان التفصيلي {isEmployer ? 'للشركة' : 'للباحث عن عمل'} <span style={{ color: '#ef4444' }}>*</span>
                   </label>
                   <textarea
                     name="detailedAddress"
@@ -691,7 +691,7 @@ const SettingsPage = () => {
                     maxLength={300}
                     rows={3}
                     required
-                    placeholder="الشارع، رقم المبنى، الدور، المنطقة، وأقرب علامة مميزة"
+                    placeholder="اكتب الشارع، رقم المبنى، المنطقة، وأقرب علامة مميزة"
                     style={{ ...inputStyle, resize: 'vertical' }}
                   />
                   <small style={{ display: 'block', marginTop: '4px', color: '#64748b', fontSize: '11px' }}>
