@@ -95,7 +95,7 @@ const SettingsPage = () => {
         setExperiences(u.experiences || []);
       } catch (error) {
         setMessage({
-          text: error.response?.data?.message || 'تعذر تحميل بيانات الحساب. حدّثي الصفحة وحاولي مرة أخرى.',
+          text: error.response?.data?.message || 'تعذر تحميل بيانات الحساب. يرجى تحديث الصفحة والمحاولة مرة أخرى.',
           type: 'error',
         });
       } finally {
@@ -704,7 +704,7 @@ const SettingsPage = () => {
                     مستندات الشركة المطلوبة للاعتماد
                   </h3>
                   <p style={{ margin: '0 0 12px', fontSize: '11px', color: '#64748b' }}>
-                    ارفعي السجل التجاري والبطاقة الضريبية بصيغة PDF أو JPG أو PNG، بحد أقصى 3 ميجابايت لكل ملف.
+                    يرجى رفع السجل التجاري والبطاقة الضريبية بصيغة PDF أو JPG أو PNG، بحد أقصى 3 ميجابايت لكل ملف.
                   </p>
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '12px' }}>
                     {[

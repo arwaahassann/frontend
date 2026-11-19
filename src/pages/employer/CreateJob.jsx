@@ -353,7 +353,7 @@ const CreateJob = () => {
             onClick={() => navigate('/settings')}
             style={{ display: 'block', marginTop: '8px', padding: 0, border: 0, background: 'none', color: '#c2410c', font: 'inherit', textDecoration: 'underline', cursor: 'pointer' }}
           >
-            أضيفي رقم الشركة من إعدادات الحساب
+            يلزم إضافة رقم الشركة من إعدادات الحساب
           </button>
         </div>
       )}

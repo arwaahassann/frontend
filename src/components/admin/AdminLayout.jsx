@@ -629,7 +629,7 @@ const AdminLayout = () => {
           </div>
           {accountSearchOpen && accountSearch.trim().length < 2 && (
             <div className="admin-account-search__popover admin-account-search__empty">
-              اكتبي حرفين على الأقل لبدء البحث
+              يلزم إدخال حرفين على الأقل لبدء البحث
             </div>
           )}
           {accountSearchOpen && accountSearch.trim().length >= 2 && (

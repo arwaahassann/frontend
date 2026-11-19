@@ -144,8 +144,8 @@ const ApplicantDetailsContent = ({ application, onClose, onStatusUpdated, detail
   const handleExecuteDecision = async (status, extraData = {}) => {
     if (detailsLoading || detailsError) {
       setFeedbackMsg(detailsError
-        ? 'تعذر تحميل أحدث بيانات الطلب. أعيدي تحميل التفاصيل قبل إرسال القرار.'
-        : 'جاري تحميل أحدث بيانات الطلب، انتظري لحظة قبل إرسال القرار.');
+        ? 'تعذر تحميل أحدث بيانات الطلب. يرجى إعادة تحميل التفاصيل قبل إرسال القرار.'
+        : 'جاري تحميل أحدث بيانات الطلب، يرجى الانتظار لحظة قبل إرسال القرار.');
       setFeedbackIsError(true);
       return;
     }
@@ -700,7 +700,7 @@ const ApplicantDetailsContent = ({ application, onClose, onStatusUpdated, detail
               <div role="status" style={{ marginBottom: '14px', padding: '12px 14px', borderRadius: '10px', background: '#f0fdf4', border: '1px solid #bbf7d0', color: '#166534', fontSize: '13px', fontWeight: 800 }}>
                 {decisionEmailSent && decisionNotificationSent
                   ? `تم إرسال القرار النهائي (${statusConfig[currentStatus]?.label}) بالبريد والإشعار. لا يمكن تغييره.`
-                  : `تم تسجيل القرار النهائي (${statusConfig[currentStatus]?.label})، لكن لم يكتمل ${decisionEmailSent ? 'إشعار الباحث' : 'إرسال البريد والإشعار'}. أعيدي المحاولة لإكمال الإرسال.`}
+                  : `تم تسجيل القرار النهائي (${statusConfig[currentStatus]?.label})، لكن لم يكتمل ${decisionEmailSent ? 'إشعار الباحث' : 'إرسال البريد والإشعار'}. يرجى المحاولة مجددًا لإكمال الإرسال.`}
               </div>
             )}
             {canRetryDecisionDelivery && (

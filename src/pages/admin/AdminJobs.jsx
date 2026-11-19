@@ -422,7 +422,7 @@ const AdminJobs = () => {
               رفض إعلان {rejectionJob.title}
             </h2>
             <p className="mt-2 text-sm leading-6 text-slate-600">
-              اكتبي سبب الرفض ليصل لصاحب الشركة، أو اتركيه فارغًا لإبلاغه بأنه لم يتم توضيح السبب.
+              يمكن إدخال سبب الرفض ليصل لصاحب الشركة، أو تركه فارغًا لإبلاغه بأنه لم يتم توضيح السبب.
             </p>
             <label htmlFor="job-rejection-reason" className="mt-5 block text-sm font-bold text-slate-700">
               سبب الرفض (اختياري)
@@ -433,7 +433,7 @@ const AdminJobs = () => {
               onChange={(event) => setRejectionReason(event.target.value)}
               maxLength={500}
               rows={5}
-              placeholder="اكتبي سبب رفض الإعلان..."
+              placeholder="سبب رفض الإعلان..."
               className="mt-2 w-full resize-y rounded-xl border border-slate-200 p-3 text-sm leading-6 text-slate-800 outline-none focus:border-rose-400 focus:ring-2 focus:ring-rose-100"
             />
             <div className="mt-4 flex items-center justify-between gap-3">
