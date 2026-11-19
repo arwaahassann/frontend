@@ -167,11 +167,16 @@ const AdminLayout = () => {
     const refreshWhenVisible = () => {
       if (document.visibilityState === 'visible') fetchNotificationCount();
     };
-    const interval = setInterval(refreshWhenVisible, 60000);
+    const refreshOnFocus = () => fetchNotificationCount();
+    const interval = setInterval(fetchNotificationCount, 15000);
     document.addEventListener('visibilitychange', refreshWhenVisible);
+    window.addEventListener('focus', refreshOnFocus);
+    window.addEventListener('adminNotificationUpdated', fetchNotificationCount);
     return () => {
       clearInterval(interval);
       document.removeEventListener('visibilitychange', refreshWhenVisible);
+      window.removeEventListener('focus', refreshOnFocus);
+      window.removeEventListener('adminNotificationUpdated', fetchNotificationCount);
     };
   }, [fetchNotificationCount]);
 
@@ -182,7 +187,7 @@ const AdminLayout = () => {
     const refreshWhenVisible = () => {
       if (document.visibilityState === 'visible') fetchNotifs();
     };
-    const interval = setInterval(refreshWhenVisible, 60000);
+    const interval = setInterval(refreshWhenVisible, 15000);
     document.addEventListener('visibilitychange', refreshWhenVisible);
 
     return () => {
@@ -304,6 +309,7 @@ const AdminLayout = () => {
       }
       await fetchNotifs();
       await fetchNotificationCount();
+      window.dispatchEvent(new Event('adminNotificationUpdated'));
     } catch (error) {
       setNotifError(error.response?.data?.message || error.message || 'تعذر تحديث الإشعارات');
     } finally {

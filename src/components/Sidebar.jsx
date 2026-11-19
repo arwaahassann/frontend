@@ -35,12 +35,17 @@ const Sidebar = ({ isOpen, onClose }) => {
     const handleNotificationUpdate = () => fetchUnread();
     window.addEventListener('notificationUpdated', handleNotificationUpdate);
 
-    // فحص دوري كل 45 ثانية لجلب أي إشعارات جديدة فور ورودها
-    const interval = setInterval(fetchUnread, 45000);
+    // فحص دوري كل 15 ثانية لجلب أي إشعارات جديدة فور ورودها
+    const interval = setInterval(fetchUnread, 15000);
+    const handleWindowFocus = () => fetchUnread();
+    window.addEventListener('focus', handleWindowFocus);
+    document.addEventListener('visibilitychange', handleWindowFocus);
 
     return () => {
       clearInterval(interval);
       window.removeEventListener('notificationUpdated', handleNotificationUpdate);
+      window.removeEventListener('focus', handleWindowFocus);
+      document.removeEventListener('visibilitychange', handleWindowFocus);
     };
   }, [user]);
 
