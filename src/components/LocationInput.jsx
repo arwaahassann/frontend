@@ -100,6 +100,11 @@ const LocationInput = ({
   const filteredLocations = POPULAR_LOCATIONS.filter((loc) =>
     loc.toLowerCase().includes(query)
   );
+  const typedLocation = (searchTerm || value || '').trim();
+  const showCustomLocation = typedLocation
+    && !POPULAR_LOCATIONS.some((loc) => loc.toLowerCase() === typedLocation.toLowerCase());
+  const optionCount = filteredLocations.length + (showCustomLocation ? 1 : 0);
+  const firstPopularOptionIndex = showCustomLocation ? 1 : 0;
 
   useEffect(() => {
     if (activeIndex >= 0 && listRef.current) {
@@ -145,22 +150,26 @@ const LocationInput = ({
     switch (e.key) {
       case 'ArrowDown':
         e.preventDefault();
-        if (filteredLocations.length > 0) {
-          setActiveIndex((prev) => (prev < filteredLocations.length - 1 ? prev + 1 : 0));
+        if (optionCount > 0) {
+          setActiveIndex((prev) => (prev < optionCount - 1 ? prev + 1 : 0));
         }
         break;
 
       case 'ArrowUp':
         e.preventDefault();
-        if (filteredLocations.length > 0) {
-          setActiveIndex((prev) => (prev > 0 ? prev - 1 : filteredLocations.length - 1));
+        if (optionCount > 0) {
+          setActiveIndex((prev) => (prev > 0 ? prev - 1 : optionCount - 1));
         }
         break;
 
       case 'Enter':
-        if (isOpen && activeIndex >= 0 && filteredLocations[activeIndex]) {
+        if (isOpen && activeIndex >= 0 && activeIndex < optionCount) {
           e.preventDefault();
-          handleSelect(filteredLocations[activeIndex]);
+          if (showCustomLocation && activeIndex === 0) {
+            handleSelect(typedLocation);
+          } else {
+            handleSelect(filteredLocations[activeIndex - firstPopularOptionIndex]);
+          }
         } else if (isOpen) {
           setIsOpen(false);
           setActiveIndex(-1);
@@ -168,8 +177,12 @@ const LocationInput = ({
         break;
 
       case 'Tab':
-        if (isOpen && activeIndex >= 0 && filteredLocations[activeIndex]) {
-          handleSelect(filteredLocations[activeIndex]);
+        if (isOpen && activeIndex >= 0 && activeIndex < optionCount) {
+          if (showCustomLocation && activeIndex === 0) {
+            handleSelect(typedLocation);
+          } else {
+            handleSelect(filteredLocations[activeIndex - firstPopularOptionIndex]);
+          }
         } else {
           setIsOpen(false);
         }
@@ -345,7 +358,33 @@ const LocationInput = ({
             <span style={{ color: '#00D2B4', fontWeight: 900 }}>({filteredLocations.length})</span>
           </div>
 
-          {filteredLocations.length === 0 ? (
+          {showCustomLocation && (
+            <div
+              role="option"
+              aria-selected={activeIndex === 0}
+              key={`custom-${typedLocation}`}
+              onClick={() => handleSelect(typedLocation)}
+              onMouseEnter={() => setActiveIndex(0)}
+              style={{
+                padding: '8px 10px',
+                borderRadius: '8px',
+                fontSize: '12px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                cursor: 'pointer',
+                background: activeIndex === 0 ? '#f0fdfa' : '#f8fafc',
+                color: '#0f766e',
+                fontWeight: 800,
+                marginBottom: '4px',
+              }}
+            >
+              <span>استخدام المكان المكتوب: {typedLocation}</span>
+              <Check size={13} color="#00D2B4" />
+            </div>
+          )}
+
+          {filteredLocations.length === 0 && !showCustomLocation ? (
             <div style={{ padding: '10px', textAlign: 'center', fontSize: '12px', fontWeight: 700, color: '#475569', background: '#f8fafc', borderRadius: '8px' }}>
               <p style={{ margin: 0 }}>سيتم استخدام المكان كما كتبته:</p>
               <p style={{ margin: '2px 0 0', color: '#0f766e', fontWeight: 900 }}>"{value}"</p>
@@ -353,13 +392,14 @@ const LocationInput = ({
           ) : (
             filteredLocations.map((loc, idx) => {
               const isSelected = value === loc;
-              const isKeyboardActive = activeIndex === idx;
+              const optionIndex = idx + firstPopularOptionIndex;
+              const isKeyboardActive = activeIndex === optionIndex;
 
               return (
                 <div
                   key={loc}
                   onClick={() => handleSelect(loc)}
-                  onMouseEnter={() => setActiveIndex(idx)}
+                  onMouseEnter={() => setActiveIndex(optionIndex)}
                   style={{
                     padding: '8px 10px',
                     borderRadius: '8px',
