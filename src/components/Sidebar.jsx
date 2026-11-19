@@ -1,5 +1,4 @@
 import { NavLink } from 'react-router-dom';
-import { useState, useEffect } from 'react';
 import {
   Home, Briefcase, FileText, Bookmark, Bell, X,
   PlusCircle, List, Users, Settings, LogOut, Sun, Moon, ShieldCheck, MessageSquare
@@ -8,41 +7,9 @@ import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import ProfileImage from './ProfileImage';
 
-import api from '../api/axiosConfig';
-
-const Sidebar = ({ isOpen, onClose }) => {
+const Sidebar = ({ isOpen, onClose, unreadCount = 0 }) => {
   const { user, logout } = useAuth();
   const { isDarkMode, toggleDarkMode } = useTheme();
-  const [unreadCount, setUnreadCount] = useState(0);
-
-  // جلب عدد الإشعارات غير المقروءة تلقائياً للباحث والناشر
-  useEffect(() => {
-    if (!user) return;
-
-    const fetchUnread = () => {
-      api.get('/api/notifications?countOnly=true')
-        .then((res) => {
-          if (res.data?.success) {
-            setUnreadCount(res.data.unreadCount || 0);
-          }
-        })
-        .catch((error) => console.error('Failed to load unread notification count:', error.message));
-    };
-
-    fetchUnread();
-
-    // تحديث فوري عند قراءة أو حذف أي إشعار من صفحة الإشعارات
-    const handleNotificationUpdate = () => fetchUnread();
-    window.addEventListener('notificationUpdated', handleNotificationUpdate);
-
-    // فحص دوري كل 45 ثانية لجلب أي إشعارات جديدة فور ورودها
-    const interval = setInterval(fetchUnread, 45000);
-
-    return () => {
-      clearInterval(interval);
-      window.removeEventListener('notificationUpdated', handleNotificationUpdate);
-    };
-  }, [user]);
 
   // ================ قائمة الباحث عن عمل ================
   const seekerItems = [
