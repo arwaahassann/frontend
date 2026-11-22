@@ -31,6 +31,8 @@ const AdminDashboard = () => {
       reviewingJobs: 0,
       closedJobs: 0,
       rejectedJobs: 0,
+      deletionPendingJobs: 0,
+      deletedJobs: 0,
       seekers: { active: 0, suspended: 0, reviewing: 0 },
       employers: { active: 0, suspended: 0, reviewing: 0 },
       thisWeek: { newEmployers: 0, newApplications: 0 },
@@ -127,7 +129,7 @@ const AdminDashboard = () => {
         <h2 className="text-base font-black text-slate-800 flex items-center gap-2 mb-4">
           <ShoppingBag className="w-5 h-5 text-purple-600" /> إحصائية الوظائف
         </h2>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-4">
           <button type="button" onClick={() => navigate('/admin/jobs?status=rejected')} className="w-full font-sans text-slate-800 text-right cursor-pointer bg-white border border-slate-100 rounded-xl p-4 flex items-center justify-between hover:bg-slate-50/70 transition">
             <div className="text-right">
               <span className="text-xs font-bold text-slate-500 block mb-1">مرفوضه</span>
@@ -173,6 +175,30 @@ const AdminDashboard = () => {
             </div>
             <div className="w-10 h-10 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
               <FileText className="w-5 h-5" />
+            </div>
+          </button>
+
+          <button type="button" onClick={() => navigate('/admin/jobs?status=deletion_pending')} className="w-full font-sans text-slate-800 text-right cursor-pointer bg-white border border-slate-100 rounded-xl p-4 flex items-center justify-between hover:bg-slate-50/70 transition">
+            <div className="text-right">
+              <span className="text-xs font-bold text-slate-500 block mb-1">طلبات الحذف</span>
+              <span className="text-xl font-black text-slate-800">
+                {loading ? '...' : (stats.deletionPendingJobs || 0).toLocaleString('en-US')}
+              </span>
+            </div>
+            <div className="w-10 h-10 rounded-lg bg-rose-50 text-rose-600 flex items-center justify-center shrink-0">
+              <AlertCircle className="w-5 h-5" />
+            </div>
+          </button>
+
+          <button type="button" onClick={() => navigate('/admin/jobs?status=deleted')} className="w-full font-sans text-slate-800 text-right cursor-pointer bg-white border border-slate-100 rounded-xl p-4 flex items-center justify-between hover:bg-slate-50/70 transition">
+            <div className="text-right">
+              <span className="text-xs font-bold text-slate-500 block mb-1">تم حذفها</span>
+              <span className="text-xl font-black text-slate-800">
+                {loading ? '...' : (stats.deletedJobs || 0).toLocaleString('en-US')}
+              </span>
+            </div>
+            <div className="w-10 h-10 rounded-lg bg-slate-100 text-slate-600 flex items-center justify-center shrink-0">
+              <XCircle className="w-5 h-5" />
             </div>
           </button>
         </div>
