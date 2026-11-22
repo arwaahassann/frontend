@@ -16,7 +16,7 @@ const Sidebar = ({ isOpen, onClose, unreadCount = 0 }) => {
     { name: 'الرئيسية',       icon: Home,      path: '/' },
     { name: 'جميع الوظائف',   icon: Briefcase, path: '/jobs' },
     { name: 'طلباتي',         icon: FileText,  path: '/applications' },
-    { name: 'قائمة المفضلات', icon: Bookmark,  path: '/favorites' },
+    { name: 'الوظائف المحفوظة', icon: Bookmark,  path: '/favorites' },
     { name: 'الاشعارات',      icon: Bell,      path: '/notifications', badge: unreadCount },
     { name: 'الشكاوي والمقترحات', icon: MessageSquare, path: '/feedback' },
   ];

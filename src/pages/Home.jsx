@@ -53,7 +53,7 @@ const SeekerHome = ({ user, stats, loading }) => {
   const seekerLinks = [
     { label: 'جميع الوظائف', path: '/jobs', icon: Briefcase, color: '#00D2B4' },
     { label: 'طلباتي', path: '/applications', icon: MessageSquare, color: '#3b82f6' },
-    { label: 'المفضلة', path: '/favorites', icon: TrendingUp, color: '#f59e0b' },
+    { label: 'الوظائف المحفوظة', path: '/favorites', icon: TrendingUp, color: '#f59e0b' },
     { label: 'الإشعارات', path: '/notifications', icon: Clock, color: '#8b5cf6' },
   ];
 

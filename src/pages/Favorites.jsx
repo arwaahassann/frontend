@@ -41,7 +41,7 @@ const Favorites = () => {
       {/* Header */}
       <div style={{ marginBottom: '22px' }}>
         <h1 style={{ margin: 0, fontSize: '22px', fontWeight: 900, color: '#1D3557' }}>
-          قائمة الوظائف المفضلة ⭐
+          الوظائف المحفوظة
         </h1>
         <p style={{ margin: '4px 0 0', fontSize: '13px', color: '#64748b' }}>
           الوظائف التي قمت بحفظها للرجوع إليها والتقديم لاحقاً
@@ -50,7 +50,7 @@ const Favorites = () => {
 
       {/* Content */}
       {loading ? (
-        <div style={{ textAlign: 'center', padding: '50px', color: '#9ca3af' }}>جاري تحميل المفضلة...</div>
+        <div style={{ textAlign: 'center', padding: '50px', color: '#9ca3af' }}>جاري تحميل الوظائف المحفوظة...</div>
       ) : savedJobs.length === 0 ? (
         <div
           style={{
