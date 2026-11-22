@@ -345,17 +345,20 @@ const AdminJobs = () => {
                           {detailsLoadingId === j._id ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Eye className="w-3.5 h-3.5" />}
                           <span>تفاصيل</span>
                         </button>
-                        <button
-                          type="button"
-                          onClick={() => navigate(`/manage/${j._id}/edit`)}
-                          className="px-2.5 py-1 rounded-lg bg-teal-50 text-[#0f766e] hover:bg-teal-100 transition text-xs font-bold flex items-center gap-1"
-                          aria-label={`تعديل إعلان ${j.title}`}
-                        >
-                          <Pencil className="w-3.5 h-3.5" />
-                          <span>تعديل</span>
-                        </button>
-                        {/* حالة طلب الحذف */}
-                        {j.status === 'deletion_pending' ? (
+                        {j.status !== 'deleted' && (
+                          <button
+                            type="button"
+                            onClick={() => navigate(`/manage/${j._id}/edit`)}
+                            className="px-2.5 py-1 rounded-lg bg-teal-50 text-[#0f766e] hover:bg-teal-100 transition text-xs font-bold flex items-center gap-1"
+                            aria-label={`تعديل إعلان ${j.title}`}
+                          >
+                            <Pencil className="w-3.5 h-3.5" />
+                            <span>تعديل</span>
+                          </button>
+                        )}
+                        {j.status === 'deleted' ? (
+                          <span className="text-xs font-bold text-slate-500">تم اعتماد الحذف</span>
+                        ) : j.status === 'deletion_pending' ? (
                           <>
                             <button
                               onClick={() => handleDeleteJob(j._id)}
