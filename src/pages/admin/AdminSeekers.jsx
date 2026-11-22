@@ -7,7 +7,7 @@ import ProfileImage from '../../components/ProfileImage';
 
 const statusLabels = {
   active: 'نشط',
-  reviewing: 'قيد المراجعة',
+  reviewing: 'قيد المراجعة (حالة سابقة)',
   suspended: 'موقوف',
 };
 
@@ -86,7 +86,6 @@ const AdminSeekers = () => {
   const tabs = [
     { value: 'all', label: 'الكل' },
     { value: 'active', label: 'نشط' },
-    { value: 'reviewing', label: 'قيد المراجعة' },
     { value: 'suspended', label: 'موقوف' },
   ];
 
@@ -215,7 +214,9 @@ const AdminSeekers = () => {
                       className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-bold text-slate-700 outline-none transition focus:border-[#00D2B4] focus:ring-2 focus:ring-[#00D2B4]/20 disabled:opacity-50"
                     >
                       <option value="active">نشط</option>
-                      <option value="reviewing">قيد المراجعة</option>
+                      {seeker.accountStatus === 'reviewing' && (
+                        <option value="reviewing" disabled>قيد المراجعة (حالة سابقة)</option>
+                      )}
                       <option value="suspended">موقوف</option>
                     </select>
                     {updatingId === seeker._id && <Loader2 className="ms-2 inline h-4 w-4 animate-spin text-slate-400" />}

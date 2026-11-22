@@ -269,7 +269,7 @@ const AdminDashboard = () => {
             {loading ? '...' : (stats.totalSeekers || 0).toLocaleString('en-US')}
           </span>
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div className="w-full font-sans text-slate-800 text-right bg-white border border-slate-100 rounded-xl p-4 flex items-center justify-between">
             <div>
               <span className="text-xs font-bold text-slate-500 block mb-1">نشط</span>
@@ -279,17 +279,6 @@ const AdminDashboard = () => {
             </div>
             <div className="w-10 h-10 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
               <Users className="w-5 h-5" />
-            </div>
-          </div>
-          <div className="w-full font-sans text-slate-800 text-right bg-white border border-slate-100 rounded-xl p-4 flex items-center justify-between">
-            <div>
-              <span className="text-xs font-bold text-slate-500 block mb-1">قيد المراجعة</span>
-              <span className="text-xl font-black text-slate-800">
-                {loading ? '...' : (stats.seekers?.reviewing || 0).toLocaleString('en-US')}
-              </span>
-            </div>
-            <div className="w-10 h-10 rounded-lg bg-amber-50 text-amber-500 flex items-center justify-center shrink-0">
-              <Clock className="w-5 h-5" />
             </div>
           </div>
           <div className="w-full font-sans text-slate-800 text-right bg-white border border-slate-100 rounded-xl p-4 flex items-center justify-between">
