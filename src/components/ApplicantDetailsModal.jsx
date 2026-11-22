@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import {
   X, User, Mail, Phone, MapPin, Briefcase, Calendar,
   FileText, Clock, CheckCircle, XCircle, MessageSquare, Download,
-  Sparkles, Check, Loader2, Video, Send, Building
+  Loader2, Video, Send, Building
 } from 'lucide-react';
 import api from '../api/axiosConfig';
 import { EMPLOYER } from '../api/endpoints';
@@ -25,8 +25,6 @@ const ApplicantDetailsContent = ({ application, onClose, onStatusUpdated, detail
   const [updating, setUpdating] = useState(false);
   const [feedbackMsg, setFeedbackMsg] = useState('');
   const [feedbackIsError, setFeedbackIsError] = useState(false);
-  const [aiAnalysis, setAiAnalysis] = useState(null);
-  const [loadingAi, setLoadingAi] = useState(false);
   const [showChat, setShowChat] = useState(false);
 
   // حالة التحكم في نوع الإجراء المفتوح حالياً (interview / rejected / accepted / null)
@@ -115,30 +113,6 @@ const ApplicantDetailsContent = ({ application, onClose, onStatusUpdated, detail
       window.open(cvUrl, '_blank');
     }
   };
-
-  const fetchAiScreening = async () => {
-    setLoadingAi(true);
-    try {
-      const res = await api.post('/api/ai/screen-candidate', {
-        jobTitle,
-        jobRequirements: application.job?.description || '',
-        applicantSkills,
-        applicantExp,
-        applicantTitle,
-        notes: application.notes || '',
-      });
-      if (res.data.success) {
-        setAiAnalysis(res.data.data);
-      }
-    } catch {
-      setFeedbackMsg('تعذر تشغيل تحليل الذكاء الاصطناعي حالياً.');
-      setFeedbackIsError(true);
-    } finally {
-      setLoadingAi(false);
-    }
-  };
-
-  const matchScore = aiAnalysis?.matchScore || 88;
 
   // إرسال قرار صاحب العمل بالبريد وإشعار الباحث داخل المنصة
   const handleExecuteDecision = async (status, extraData = {}) => {
@@ -359,7 +333,7 @@ const ApplicantDetailsContent = ({ application, onClose, onStatusUpdated, detail
             </div>
           )}
 
-          {/* 3. كارت هوية المتقدم + نسبة التطابق المتقدمة (AI Match Card) */}
+          {/* 3. كارت هوية المتقدم */}
           <div
             style={{
               background: 'linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%)',
@@ -402,113 +376,6 @@ const ApplicantDetailsContent = ({ application, onClose, onStatusUpdated, detail
               </div>
             </div>
 
-            {/* بطاقة نسبة التطابق الذكية */}
-            <div
-              style={{
-                background: '#ffffff',
-                border: '1.5px solid #ccfbf1',
-                borderRadius: '16px',
-                padding: '12px 20px',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '14px',
-                boxShadow: '0 4px 12px rgba(0, 210, 180, 0.1)',
-              }}
-            >
-              <div
-                style={{
-                  width: '46px',
-                  height: '46px',
-                  borderRadius: '50%',
-                  background: '#f0fdfa',
-                  border: '3px solid #00D2B4',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  fontWeight: 900,
-                  fontSize: '15px',
-                  color: '#0f766e',
-                }}
-              >
-                {matchScore}%
-              </div>
-              <div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '4px', color: '#0f766e', fontWeight: 800, fontSize: '13px' }}>
-                  <Sparkles size={14} color="#00D2B4" /> نسبة تطابق الملف بالـ AI
-                </div>
-                <p style={{ margin: '2px 0 0', fontSize: '11px', color: '#16a34a', fontWeight: 700 }}>
-                  {matchScore >= 85 ? '🌟 تطابق ممتاز مع متطلبات الوظيفة' : '👍 تطابق جيد جداً'}
-                </p>
-              </div>
-            </div>
-          </div>
-
-          {/* 3.5. بطاقة التحليل والتوصية الذكية للمتقدم */}
-          <div
-            style={{
-              background: 'linear-gradient(135deg, #f0fdfa 0%, #ffffff 100%)',
-              border: '1.5px solid #99f6e4',
-              borderRadius: '18px',
-              padding: '18px 22px',
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '10px',
-            }}
-          >
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <Sparkles size={18} color="#00D2B4" />
-              <h4 style={{ margin: 0, fontSize: '14px', fontWeight: 900, color: '#0f766e' }}>
-                تحليل الذكاء الاصطناعي لملف المتقدم (AI Candidate Screening):
-              </h4>
-            </div>
-
-            {!loadingAi && !aiAnalysis && (
-              <button
-                type="button"
-                onClick={fetchAiScreening}
-                style={{
-                  alignSelf: 'flex-start',
-                  border: '1px solid #99f6e4',
-                  borderRadius: '9px',
-                  padding: '8px 12px',
-                  background: '#ffffff',
-                  color: '#0f766e',
-                  cursor: 'pointer',
-                  fontWeight: 800,
-                }}
-              >
-                تشغيل التحليل عند الحاجة
-              </button>
-            )}
-
-            {loadingAi ? (
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#64748b', fontSize: '13px' }}>
-                <Loader2 size={16} className="animate-spin" /> جاري تدقيق ومطابقة السيرة الذاتية بالذكاء الاصطناعي...
-              </div>
-            ) : (
-              <>
-                <p style={{ margin: 0, fontSize: '13px', color: '#334155', lineHeight: 1.6 }}>
-                  {aiAnalysis?.summary || `ملف مهني واعد لـ (${applicantName})، يمتلك مقومات ملائمة لشغل وظيفة (${jobTitle}).`}
-                </p>
-
-                {/* نقاط القوة والمهارات المطابقة */}
-                {Array.isArray(aiAnalysis?.strengths) && aiAnalysis.strengths.length > 0 && (
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', marginTop: '4px' }}>
-                    {aiAnalysis.strengths.map((str, i) => (
-                      <div key={i} style={{ fontSize: '12px', fontWeight: 700, color: '#047857', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                        <Check size={14} color="#10b981" /> {str}
-                      </div>
-                    ))}
-                  </div>
-                )}
-
-                {aiAnalysis?.recommendation && (
-                  <div style={{ background: '#ffffff', padding: '10px 14px', borderRadius: '10px', border: '1px solid #ccfbf1', fontSize: '12px', fontWeight: 800, color: '#047857' }}>
-                    💡 <strong>توصية الـ AI: </strong>{aiAnalysis.recommendation}
-                  </div>
-                )}
-              </>
-            )}
           </div>
 
           {/* 4. شبكة بيانات الاتصال والعنوان */}
