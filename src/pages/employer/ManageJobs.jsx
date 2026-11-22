@@ -11,6 +11,7 @@ const statusConfig = {
   active:           { label: 'نشط',                  bg: '#dcfce7', color: '#16a34a' },
   reviewing:        { label: 'قيد المراجعة',         bg: '#fef9c3', color: '#a16207' },
   deletion_pending: { label: 'طلب حذف قيد المراجعة', bg: '#ffe4e6', color: '#e11d48' },
+  deleted:          { label: 'تم حذف الوظيفة',        bg: '#f1f5f9', color: '#475569' },
   pending:          { label: 'مجدول',                bg: '#dbeafe', color: '#2563eb' },
   closed:           { label: 'مغلق',                 bg: '#f1f5f9', color: '#64748b' },
   rejected:         { label: 'مرفوض',                bg: '#fee2e2', color: '#dc2626' },
@@ -20,6 +21,7 @@ const tabs = [
   { key: 'all',              label: 'الكل' },
   { key: 'reviewing',        label: 'قيد المراجعة' },
   { key: 'deletion_pending', label: 'طلبات الحذف' },
+  { key: 'deleted',          label: 'تم حذفها' },
   { key: 'active',           label: 'نشط' },
   { key: 'closed',           label: 'مغلق' },
 ];
@@ -85,6 +87,7 @@ const ManageJobs = () => {
     all:              jobs.length,
     reviewing:        jobs.filter((j) => j.status === 'reviewing').length,
     deletion_pending: jobs.filter((j) => j.status === 'deletion_pending').length,
+    deleted:          jobs.filter((j) => j.status === 'deleted').length,
     active:           jobs.filter((j) => j.status === 'active').length,
     closed:           jobs.filter((j) => j.status === 'closed').length,
   };

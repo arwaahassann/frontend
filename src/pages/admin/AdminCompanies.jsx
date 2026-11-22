@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { Search, Loader2, AlertCircle, Eye, X, Building2, UserRound, Mail, Phone, MapPin, Globe, BriefcaseBusiness, CalendarDays } from 'lucide-react';
-import { getAdminCompanies, getAdminCompanyDocument, updateAdminCompanyStatus } from '../../api/admin';
+import { Search, Loader2, AlertCircle, Eye, X, Building2, UserRound, Mail, Phone, MapPin, Globe, BriefcaseBusiness, CalendarDays, Pencil, Save, XCircle } from 'lucide-react';
+import { getAdminCompanies, getAdminCompanyDocument, updateAdminCompanyStatus, updateAdminCompanyInfo } from '../../api/admin';
 import AdminPagination from '../../components/admin/AdminPagination';
 import ProfileImage from '../../components/ProfileImage';
+import LocationInput from '../../components/LocationInput';
 
 const AdminCompanies = () => {
   const [searchParams] = useSearchParams();
@@ -20,6 +21,62 @@ const AdminCompanies = () => {
   const [detailsCompany, setDetailsCompany] = useState(null);
   const [downloadingDocument, setDownloadingDocument] = useState('');
   const [documentError, setDocumentError] = useState('');
+
+  // ── حالة التعديل ──
+  const [isEditing, setIsEditing] = useState(false);
+  const [editForm, setEditForm] = useState({ company: '', location: '', detailedAddress: '' });
+  const [savingInfo, setSavingInfo] = useState(false);
+  const [editError, setEditError] = useState('');
+  const [editSuccess, setEditSuccess] = useState('');
+
+  const openCompanyDetails = (company) => {
+    setDetailsCompany(company);
+    setEditForm({
+      company: company.company || company.name || '',
+      location: company.location || '',
+      detailedAddress: company.detailedAddress || '',
+    });
+    setIsEditing(false);
+    setEditError('');
+    setEditSuccess('');
+    setDocumentError('');
+  };
+
+  const handleSaveCompanyInfo = async (e) => {
+    if (e) e.preventDefault();
+    if (!editForm.location || !editForm.location.trim()) {
+      setEditError('الموقع / المحافظة إلزامي');
+      return;
+    }
+    if (!editForm.detailedAddress || !editForm.detailedAddress.trim()) {
+      setEditError('العنوان التفصيلي إلزامي');
+      return;
+    }
+
+    try {
+      setSavingInfo(true);
+      setEditError('');
+      setEditSuccess('');
+      const res = await updateAdminCompanyInfo(detailsCompany._id, {
+        company: editForm.company?.trim(),
+        location: editForm.location?.trim(),
+        detailedAddress: editForm.detailedAddress?.trim(),
+      });
+      if (res.success && res.company) {
+        setCompanies((prev) =>
+          prev.map((c) => (c._id === detailsCompany._id ? { ...c, ...res.company } : c))
+        );
+        setDetailsCompany((prev) => ({ ...prev, ...res.company }));
+        setEditSuccess('تم حفظ بيانات العنوان والشركة بنجاح');
+        setIsEditing(false);
+        setTimeout(() => setEditSuccess(''), 4000);
+      }
+    } catch (err) {
+      setEditError(err.response?.data?.message || err.message || 'تعذر حفظ بيانات الشركة');
+    } finally {
+      setSavingInfo(false);
+    }
+  };
 
   const fetchCompanies = useCallback(async () => {
     try {
@@ -255,7 +312,7 @@ const AdminCompanies = () => {
                       <div className="flex items-center justify-center gap-2">
                         <button
                           type="button"
-                          onClick={() => setDetailsCompany(c)}
+                          onClick={() => openCompanyDetails(c)}
                           className="flex items-center gap-1 rounded-lg bg-sky-50 px-3 py-1 text-xs font-bold text-sky-700 transition hover:bg-sky-100"
                           aria-label={`عرض تفاصيل شركة ${c.company || c.name}`}
                         >
@@ -327,7 +384,119 @@ const AdminCompanies = () => {
             </header>
 
             <div className="overflow-y-auto px-6 py-5">
-              <h3 className="mb-3 text-base font-black text-slate-800">بيانات الشركة</h3>
+              {editSuccess && (
+                <div role="status" className="mb-4 rounded-xl border border-emerald-200 bg-emerald-50 p-3 text-sm font-bold text-emerald-700">
+                  {editSuccess}
+                </div>
+              )}
+
+              <div className="mb-3 flex items-center justify-between">
+                <h3 className="m-0 text-base font-black text-slate-800">بيانات الشركة</h3>
+                {!isEditing ? (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setEditForm({
+                        company: detailsCompany.company || detailsCompany.name || '',
+                        location: detailsCompany.location || '',
+                        detailedAddress: detailsCompany.detailedAddress || '',
+                      });
+                      setIsEditing(true);
+                      setEditError('');
+                    }}
+                    className="flex items-center gap-1.5 rounded-lg border border-[#00D2B4]/40 bg-[#00D2B4]/10 px-3 py-1.5 text-xs font-bold text-[#0f766e] transition hover:bg-[#00D2B4]/20"
+                  >
+                    <Pencil size={13} />
+                    <span>تعديل العنوان والشركة</span>
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => setIsEditing(false)}
+                    className="flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-bold text-slate-600 transition hover:bg-slate-50"
+                  >
+                    <X size={13} />
+                    <span>إلغاء التعديل</span>
+                  </button>
+                )}
+              </div>
+
+              {isEditing && (
+                <form onSubmit={handleSaveCompanyInfo} className="mb-6 rounded-2xl border border-[#00D2B4]/30 bg-[#f0fdfa] p-4 space-y-4">
+                  {editError && (
+                    <div role="alert" className="rounded-xl border border-red-200 bg-red-50 p-3 text-xs font-bold text-red-700">
+                      {editError}
+                    </div>
+                  )}
+
+                  <div>
+                    <label className="mb-1 block text-xs font-bold text-slate-700">
+                      اسم الشركة / المنشأة <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      value={editForm.company}
+                      onChange={(e) => setEditForm(prev => ({ ...prev, company: e.target.value }))}
+                      placeholder="اكتب اسم الشركة"
+                      required
+                      className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm font-semibold text-slate-800 outline-none transition focus:border-[#00D2B4] focus:ring-2 focus:ring-[#00D2B4]/20"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="mb-1 block text-xs font-bold text-slate-700">
+                      الموقع / المحافظة أو الدولة <span className="text-red-500">*</span>
+                    </label>
+                    <LocationInput
+                      name="location"
+                      value={editForm.location}
+                      onChange={(e) => setEditForm(prev => ({ ...prev, location: e.target.value }))}
+                      placeholder="اختر من القائمة أو اكتب الدولة / المحافظة المخصصة..."
+                      required
+                    />
+                    <small className="mt-1 block text-[11px] text-slate-500">
+                      يمكنك الاختيار من القائمة أو كتابة أي عنوان مخصص مباشرة دون التقيد بالخيارات.
+                    </small>
+                  </div>
+
+                  <div>
+                    <label className="mb-1 block text-xs font-bold text-slate-700">
+                      العنوان التفصيلي <span className="text-red-500">*</span>
+                    </label>
+                    <textarea
+                      value={editForm.detailedAddress}
+                      onChange={(e) => setEditForm(prev => ({ ...prev, detailedAddress: e.target.value }))}
+                      maxLength={300}
+                      rows={3}
+                      required
+                      placeholder="اكتب الشارع، رقم المبنى، المنطقة، وأقرب علامة مميزة"
+                      className="w-full rounded-xl border border-slate-200 bg-white p-3 text-sm font-semibold text-slate-800 outline-none transition focus:border-[#00D2B4] focus:ring-2 focus:ring-[#00D2B4]/20"
+                    />
+                    <small className="mt-1 block text-[11px] text-slate-500">
+                      {(editForm.detailedAddress || '').length}/300 حرف
+                    </small>
+                  </div>
+
+                  <div className="flex items-center justify-end gap-2 pt-2">
+                    <button
+                      type="button"
+                      onClick={() => setIsEditing(false)}
+                      className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-xs font-bold text-slate-600 transition hover:bg-slate-100"
+                    >
+                      إلغاء
+                    </button>
+                    <button
+                      type="submit"
+                      disabled={savingInfo}
+                      className="flex items-center gap-1.5 rounded-xl bg-[#00a990] px-5 py-2 text-xs font-bold text-white transition hover:bg-[#00917c] disabled:opacity-50"
+                    >
+                      {savingInfo ? <Loader2 size={14} className="animate-spin" /> : <Save size={14} />}
+                      <span>{savingInfo ? 'جاري الحفظ...' : 'حفظ التعديلات'}</span>
+                    </button>
+                  </div>
+                </form>
+              )}
+
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 {[
                   { label: 'اسم الشركة', value: detailsCompany.company || detailsCompany.name, icon: Building2 },

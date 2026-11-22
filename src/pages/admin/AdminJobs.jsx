@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { useSearchParams } from 'react-router-dom';
-import { Search, Loader2, AlertCircle, Trash2, Eye, X, MapPin, Building2, Briefcase, CalendarDays, CircleDollarSign, GraduationCap, Clock3, ChevronLeft, ChevronRight } from 'lucide-react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import { Search, Loader2, AlertCircle, Trash2, Eye, X, MapPin, Building2, Briefcase, CalendarDays, CircleDollarSign, GraduationCap, Clock3, ChevronLeft, ChevronRight, Pencil, Plus } from 'lucide-react';
 import { getAdminJobs, getAdminJobDetails, updateAdminJobStatus, deleteAdminJob } from '../../api/admin';
 
 const AdminJobs = () => {
+  const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [jobs, setJobs] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -162,6 +163,9 @@ const AdminJobs = () => {
     if (status === 'deletion_pending') {
       return <span className="inline-block px-4 py-1 rounded-full text-xs font-bold bg-rose-100 text-rose-700">طلب حذف</span>;
     }
+    if (status === 'deleted') {
+      return <span className="inline-block px-4 py-1 rounded-full text-xs font-bold bg-slate-200 text-slate-700">تم الحذف</span>;
+    }
     if (status === 'closed') {
       return <span className="inline-block px-4 py-1 rounded-full text-xs font-bold bg-slate-200 text-slate-700">مغلقة</span>;
     }
@@ -175,9 +179,19 @@ const AdminJobs = () => {
   return (
     <div className="space-y-6 max-w-7xl mx-auto">
       {/* ── Header ── */}
-      <div className="text-right">
-        <h1 className="text-2xl md:text-3xl font-black text-slate-800">اداره الوظائف</h1>
-        <p className="text-sm md:text-base text-slate-500 mt-1 font-medium">اداره ومراجعه جميع الوظائف والموافقة على التعديلات والحذف</p>
+      <div className="flex items-center justify-between gap-4 flex-wrap text-right">
+        <div>
+          <h1 className="text-2xl md:text-3xl font-black text-slate-800">اداره الوظائف</h1>
+          <p className="text-sm md:text-base text-slate-500 mt-1 font-medium">اداره ومراجعه جميع الوظائف والموافقة على التعديلات والحذف</p>
+        </div>
+        <button
+          type="button"
+          onClick={() => navigate('/manage/new')}
+          className="flex items-center gap-2 rounded-xl bg-[#00a990] px-4 py-2.5 text-sm font-bold text-white shadow-sm transition hover:bg-[#00917c]"
+        >
+          <Plus size={16} />
+          <span>إضافة وظيفة جديدة</span>
+        </button>
       </div>
 
       {/* ── Tabs ── */}
@@ -211,6 +225,16 @@ const AdminJobs = () => {
           }`}
         >
           طلبات الحذف
+        </button>
+        <button
+          onClick={() => handleStatusFilterChange('deleted')}
+          className={`pb-3 text-base font-bold transition border-b-2 ${
+            statusFilter === 'deleted'
+              ? 'border-[#00D2B4] text-[#00D2B4]'
+              : 'border-transparent text-slate-500 hover:text-slate-800'
+          }`}
+        >
+          تم حذفها
         </button>
         <button
           onClick={() => handleStatusFilterChange('active')}
@@ -320,6 +344,15 @@ const AdminJobs = () => {
                         >
                           {detailsLoadingId === j._id ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Eye className="w-3.5 h-3.5" />}
                           <span>تفاصيل</span>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => navigate(`/manage/${j._id}/edit`)}
+                          className="px-2.5 py-1 rounded-lg bg-teal-50 text-[#0f766e] hover:bg-teal-100 transition text-xs font-bold flex items-center gap-1"
+                          aria-label={`تعديل إعلان ${j.title}`}
+                        >
+                          <Pencil className="w-3.5 h-3.5" />
+                          <span>تعديل</span>
                         </button>
                         {/* حالة طلب الحذف */}
                         {j.status === 'deletion_pending' ? (
@@ -481,14 +514,24 @@ const AdminJobs = () => {
                 <h2 id="admin-job-details-title" className="text-xl font-black text-slate-800 md:text-2xl">{detailsJob.title}</h2>
                 <p className="mt-1 text-sm text-slate-500">{detailsJob.company || detailsJob.postedBy?.company || 'اسم الشركة غير متوفر'}</p>
               </div>
-              <button
-                type="button"
-                onClick={() => setDetailsJob(null)}
-                className="rounded-xl p-2 text-slate-500 transition hover:bg-slate-200 hover:text-slate-800"
-                aria-label="إغلاق تفاصيل الإعلان"
-              >
-                <X size={21} />
-              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => navigate(`/manage/${detailsJob._id}/edit`)}
+                  className="flex items-center gap-1.5 rounded-xl border border-[#00D2B4]/40 bg-[#00D2B4]/10 px-3.5 py-2 text-xs font-bold text-[#0f766e] transition hover:bg-[#00D2B4]/20"
+                >
+                  <Pencil size={14} />
+                  <span>تعديل الإعلان والعنوان</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setDetailsJob(null)}
+                  className="rounded-xl p-2 text-slate-500 transition hover:bg-slate-200 hover:text-slate-800"
+                  aria-label="إغلاق تفاصيل الإعلان"
+                >
+                  <X size={21} />
+                </button>
+              </div>
             </header>
 
             <div className="overflow-y-auto px-6 py-5">

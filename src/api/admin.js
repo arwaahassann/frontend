@@ -20,6 +20,11 @@ export const updateAdminCompanyStatus = async (id, status) => {
   return res.data;
 };
 
+export const updateAdminCompanyInfo = async (id, data) => {
+  const res = await api.put(`/api/admin/companies/${id}/info`, data);
+  return res.data;
+};
+
 export const getAdminCompanyDocument = async (companyId, documentType) => {
   const res = await api.get(`/api/admin/companies/${companyId}/documents/${documentType}`);
   return res.data;

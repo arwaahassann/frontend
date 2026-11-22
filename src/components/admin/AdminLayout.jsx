@@ -168,7 +168,7 @@ const AdminLayout = () => {
       if (document.visibilityState === 'visible') fetchNotificationCount();
     };
     const refreshOnFocus = () => fetchNotificationCount();
-    const interval = setInterval(fetchNotificationCount, 15000);
+    const interval = setInterval(fetchNotificationCount, 5000);
     document.addEventListener('visibilitychange', refreshWhenVisible);
     window.addEventListener('focus', refreshOnFocus);
     window.addEventListener('adminNotificationUpdated', fetchNotificationCount);
@@ -187,7 +187,7 @@ const AdminLayout = () => {
     const refreshWhenVisible = () => {
       if (document.visibilityState === 'visible') fetchNotifs();
     };
-    const interval = setInterval(refreshWhenVisible, 15000);
+    const interval = setInterval(refreshWhenVisible, 5000);
     document.addEventListener('visibilitychange', refreshWhenVisible);
 
     return () => {
