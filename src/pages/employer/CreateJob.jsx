@@ -685,6 +685,9 @@ const CreateJob = () => {
 
               <div>
                 <label style={labelStyle}>تاريخ إغلاق التقديم</label>
+                <p style={{ margin: '0 0 8px', color: '#64748b', fontSize: '13px' }}>
+                  إذا لم تحدد تاريخًا، سيُغلق الإعلان تلقائيًا بعد 30 يومًا من اعتماده ونشره.
+                </p>
                 <div style={selectContainerStyle}>
                   <input
                     type="date"
