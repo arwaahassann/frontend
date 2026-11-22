@@ -50,8 +50,8 @@ export const getAdminJobDetails = async (id) => {
   return res.data;
 };
 
-export const updateAdminJobStatus = async (id, status, rejectionReason) => {
-  const res = await api.put(`/api/admin/jobs/${id}/status`, { status, rejectionReason });
+export const updateAdminJobStatus = async (id, status, rejectionReason, rejectDeletion = false) => {
+  const res = await api.put(`/api/admin/jobs/${id}/status`, { status, rejectionReason, rejectDeletion });
   return res.data;
 };
 

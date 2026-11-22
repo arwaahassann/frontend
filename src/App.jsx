@@ -145,6 +145,8 @@ function App() {
                 <Route path="/admin"              element={<AdminDashboard />} />
                 <Route path="/admin/seekers"      element={<AdminSeekers />} />
                 <Route path="/admin/jobs"         element={<AdminJobs />} />
+                <Route path="/admin/jobs/new"     element={<CreateJob />} />
+                <Route path="/admin/jobs/:id/edit" element={<CreateJob />} />
                 <Route path="/admin/companies"    element={<AdminCompanies />} />
                 <Route path="/admin/applications" element={<AdminApplications />} />
                 <Route path="/admin/reports"      element={<AdminReports />} />

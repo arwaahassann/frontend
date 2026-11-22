@@ -100,18 +100,21 @@ const AdminJobs = () => {
     if (page > 1) setPage((current) => current - 1);
   };
 
-  const handleStatusChange = async (jobId, newStatus) => {
+  const handleStatusChange = async (jobId, newStatus, rejectDeletion = false) => {
     try {
       setUpdatingId(jobId);
       const res = await updateAdminJobStatus(
         jobId,
         newStatus,
-        newStatus === 'rejected' ? rejectionReason : undefined
+        newStatus === 'rejected' ? rejectionReason : undefined,
+        rejectDeletion
       );
       if (res.success) {
-        setJobs((prev) =>
-          prev.map((j) => (j._id === jobId ? { ...j, status: newStatus } : j))
-        );
+        setJobs((prev) => (
+          rejectDeletion && statusFilter === 'deletion_pending'
+            ? prev.filter((j) => j._id !== jobId)
+            : prev.map((j) => (j._id === jobId ? { ...j, status: res.job?.status || newStatus } : j))
+        ));
         if (detailsJob?._id === jobId) setDetailsJob(null);
         return true;
       }
@@ -186,7 +189,7 @@ const AdminJobs = () => {
         </div>
         <button
           type="button"
-          onClick={() => navigate('/manage/new')}
+          onClick={() => navigate('/admin/jobs/new')}
           className="flex items-center gap-2 rounded-xl bg-[#00a990] px-4 py-2.5 text-sm font-bold text-white shadow-sm transition hover:bg-[#00917c]"
         >
           <Plus size={16} />
@@ -348,7 +351,7 @@ const AdminJobs = () => {
                         {j.status !== 'deleted' && (
                           <button
                             type="button"
-                            onClick={() => navigate(`/manage/${j._id}/edit`)}
+                            onClick={() => navigate(`/admin/jobs/${j._id}/edit`)}
                             className="px-2.5 py-1 rounded-lg bg-teal-50 text-[#0f766e] hover:bg-teal-100 transition text-xs font-bold flex items-center gap-1"
                             aria-label={`تعديل إعلان ${j.title}`}
                           >
@@ -370,10 +373,10 @@ const AdminJobs = () => {
                               <span>موافقة على الحذف</span>
                             </button>
                             <button
-                              onClick={() => handleStatusChange(j._id, 'active')}
+                              onClick={() => handleStatusChange(j._id, 'active', true)}
                               disabled={updatingId === j._id}
                               className="px-2.5 py-1 rounded-lg bg-slate-100 text-slate-700 hover:bg-slate-200 transition text-xs font-bold disabled:opacity-50"
-                              title="رفض طلب الحذف وإبقاء الوظيفة نشطة"
+                              title="رفض طلب الحذف وإعادة الوظيفة إلى حالتها السابقة"
                             >
                               رفض الحذف
                             </button>
@@ -518,14 +521,14 @@ const AdminJobs = () => {
                 <p className="mt-1 text-sm text-slate-500">{detailsJob.company || detailsJob.postedBy?.company || 'اسم الشركة غير متوفر'}</p>
               </div>
               <div className="flex items-center gap-2">
-                <button
+                {detailsJob.status !== 'deleted' && <button
                   type="button"
-                  onClick={() => navigate(`/manage/${detailsJob._id}/edit`)}
+                  onClick={() => navigate(`/admin/jobs/${detailsJob._id}/edit`)}
                   className="flex items-center gap-1.5 rounded-xl border border-[#00D2B4]/40 bg-[#00D2B4]/10 px-3.5 py-2 text-xs font-bold text-[#0f766e] transition hover:bg-[#00D2B4]/20"
                 >
                   <Pencil size={14} />
                   <span>تعديل الإعلان والعنوان</span>
-                </button>
+                </button>}
                 <button
                   type="button"
                   onClick={() => setDetailsJob(null)}

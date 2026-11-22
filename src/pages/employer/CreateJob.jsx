@@ -10,6 +10,7 @@ const CreateJob = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { user } = useAuth();
+  const jobsPath = user?.role === 'admin' ? '/admin/jobs' : '/manage';
 
   const [formData, setFormData] = useState({
     title: '',
@@ -155,10 +156,14 @@ const CreateJob = () => {
         await api.put(EMPLOYER.UPDATE_JOB(id), payload);
         setSuccessMessage('تم تحديث إعلان الوظيفة بنجاح! 🎉');
         setTimeout(() => {
-          navigate('/manage');
+          navigate(jobsPath);
         }, 1200);
       } else {
         await api.post(EMPLOYER.CREATE_JOB, payload);
+        if (user?.role === 'admin') {
+          navigate(jobsPath);
+          return;
+        }
         setCreatedJobTitle(formData.title);
         setShowSuccessScreen(true);
       }
@@ -246,7 +251,7 @@ const CreateJob = () => {
             </button>
 
             <button
-              onClick={() => navigate('/manage')}
+              onClick={() => navigate(jobsPath)}
               style={{
                 background: '#f8fafc',
                 color: '#1D3557',
