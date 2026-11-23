@@ -10,7 +10,7 @@ const CreateJob = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { user } = useAuth();
-  const jobsPath = user?.role === 'admin' ? '/admin/jobs' : '/manage';
+  const jobsPath = '/manage';
 
   const [formData, setFormData] = useState({
     title: '',
@@ -160,10 +160,6 @@ const CreateJob = () => {
         }, 1200);
       } else {
         await api.post(EMPLOYER.CREATE_JOB, payload);
-        if (user?.role === 'admin') {
-          navigate(jobsPath);
-          return;
-        }
         setCreatedJobTitle(formData.title);
         setShowSuccessScreen(true);
       }
